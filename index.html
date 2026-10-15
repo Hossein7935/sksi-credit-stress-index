@@ -26,7 +26,7 @@ body.light .interactive-chart{background:#fff}#languageSelect{max-width:130px;cu
 body.light .range-btn{background:#f8fafc;color:#53657d}
 body.light .range-btn.active,body.light .range-btn:hover{background:#eaf2ff;color:#1d4ed8}
 .theme-toggle{white-space:nowrap}
-.source-spark{display:block;width:100%;height:140px;object-fit:contain;object-position:center;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:10px}
+.source-spark{display:block;width:100%;height:140px;object-fit:contain;object-position:center;background:transparent;border:1px solid var(--line);border-radius:8px;margin-top:10px;cursor:crosshair;opacity:1;transition:opacity .12s ease}.source-spark:hover{opacity:1;filter:none}.component:has(.source-spark:hover){z-index:2}
 .source-hint{display:block;color:var(--blue);font-size:11px;margin-top:8px}
 .component-link{overflow:hidden}
 @media(max-width:760px){.source-spark{height:110px}}
