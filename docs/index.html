@@ -661,6 +661,19 @@ body.light #chartWrap.is-3d #chartTip{background:rgba(249,252,255,.94)!important
 @media(max-width:760px){#chartWrap.is-3d #historyChart{transform:perspective(1000px) rotateX(8deg) rotateY(0deg) translateZ(12px) scale(1.005)!important}}
 @media(prefers-reduced-motion:reduce){#chartWrap.is-3d,#chartWrap.is-3d #historyChart{transition:none!important}#chartWrap.is-3d:after{animation:none!important}}
 
+
+/* Real WebGL replaces the old CSS-shadow 3D imitation. */
+#chartWrap{position:relative;overflow:hidden}
+#sksiWebGL{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#historyChart{position:relative;z-index:1;background:transparent}
+#chartWrap.is-3d{transform:none!important;perspective:none!important;background:transparent!important}
+#chartWrap.is-3d #historyChart{transform:none!important;filter:none!important}
+#chartWrap.is-3d #historyChart>rect:first-child{opacity:0!important}
+#chartWrap.is-3d #historyChart .plot-extrusion,#chartWrap.is-3d #historyChart .spatial-floor{display:none!important}
+#chartWrap.is-3d #historyChart>path,#chartWrap.is-3d #historyChart>polyline,#chartWrap.is-3d #historyChart>circle{opacity:0!important}
+#chartWrap.is-3d #historyChart text{fill:var(--text)!important}
+#chartWrap.is-3d:before,#chartWrap.is-3d:after{display:none!important}
+
 </style>
 </head>
 <body>
@@ -720,6 +733,7 @@ body.light #chartWrap.is-3d #chartTip{background:rgba(249,252,255,.94)!important
 </section>
 <section class="method-strip"><div class="method-mark">i</div><div><h2 id="methodTitle">Daten mit Kontext lesen</h2><p id="methodLead">Transparent, nachvollziehbar und mit klaren Grenzen.</p></div></section><footer class="footer"><span id="loadError" class="error"></span><span>Quelle: ICE BofA OAS, Moody’s Corporate Bond Yields und Chicago Fed NFCI via FRED.</span><span><a href="https://github.com/Hossein7935/sksi-credit-stress-index/blob/main/README.md" target="_blank" rel="noreferrer">Methodik & Grenzen ↗</a> · Keine Anlageberatung.</span></footer>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 
 const SOURCES={
@@ -731,6 +745,32 @@ const SOURCES={
 let chartRows=[],chartYears=0,chartSelected=null;
 const NS='http://www.w3.org/2000/svg';
 function svgEl(tag,attrs={},txt=''){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;return e;}
+/* Actual Three.js WebGL 3D scene for the SKSI history chart. */
+let sksi3dScene=null;
+function sksi3dDraw(rows){
+ const wrap=$('chartWrap'),enabled=wrap.classList.contains('is-3d');
+ if(!enabled){if(sksi3dScene)sksi3dScene.canvas.style.display='none';return;}
+ if(!window.THREE){$('loadError').textContent='WebGL-Ansicht konnte nicht geladen werden.';return;}
+ let q=sksi3dScene;
+ if(!q){const canvas=document.createElement('canvas');canvas.id='sksiWebGL';wrap.insertBefore(canvas,wrap.firstChild);
+  const renderer=new THREE.WebGLRenderer({canvas:canvas,alpha:true,antialias:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(43,1,.1,100);
+  scene.add(new THREE.HemisphereLight(0xb8eaff,0x101a36,2));
+  const lamp=new THREE.PointLight(0x35d9ff,35,30);lamp.position.set(-2,5,5);scene.add(lamp);
+  q=sksi3dScene={canvas:canvas,renderer:renderer,scene:scene,camera:camera,yaw:0,pitch:.42,rows:[]};}
+ q.canvas.style.display='block';q.rows=rows;
+ while(q.scene.children.length>2){const o=q.scene.children.pop();if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose();}
+ const lightMode=document.body.classList.contains('light'),gridColor=lightMode?0x7397c8:0x176b98;
+ const grid=new THREE.GridHelper(10,20,gridColor,gridColor);grid.position.y=-1.7;grid.material.transparent=true;grid.material.opacity=.38;q.scene.add(grid);
+ [{v:48,c:0xfacc15},{v:68,c:0xfb923c},{v:84,c:0xfb7185}].forEach(t=>{const yy=-1.65+t.v/100*3.15;const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-4.2,yy,0),new THREE.Vector3(4.2,yy,0)]);q.scene.add(new THREE.Line(geo,new THREE.LineBasicMaterial({color:t.c,transparent:true,opacity:.8})));});
+ const pts=rows.map((r,i)=>new THREE.Vector3(-4+8*i/(rows.length-1),-1.65+Math.max(0,Math.min(100,r.score))/100*3.15,Math.sin(i/(rows.length-1)*Math.PI*2)*.24));
+ const curve=new THREE.CatmullRomCurve3(pts);
+ q.scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(180,rows.length),.085,8,false),new THREE.MeshBasicMaterial({color:lightMode?0x528dff:0x0bbdf5,transparent:true,opacity:.18,depthWrite:false})));
+ q.scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(180,rows.length),.034,8,false),new THREE.MeshStandardMaterial({color:lightMode?0x174fc2:0x8bf6ff,emissive:lightMode?0x103b9b:0x087da8,emissiveIntensity:2,metalness:.35,roughness:.2})));
+ const end=pts[pts.length-1],marker=new THREE.Mesh(new THREE.SphereGeometry(.105,16,12),new THREE.MeshBasicMaterial({color:0xa5f3fc}));marker.position.copy(end);q.scene.add(marker);
+ const w=Math.max(1,wrap.clientWidth),h=Math.max(1,wrap.clientHeight);q.renderer.setSize(w,h,false);q.camera.aspect=w/h;q.camera.updateProjectionMatrix();
+ const dist=11;q.camera.position.set(Math.sin(q.yaw)*dist,2.5+Math.sin(q.pitch)*dist*.55,Math.cos(q.yaw)*dist*Math.cos(q.pitch));q.camera.lookAt(0,0,0);q.renderer.render(q.scene,q.camera);
+}
 function renderChart(){
  const svg=$('historyChart'),wrap=$('chartWrap'),tip=$('chartTip');if(!svg||!chartRows.length)return;
  const all=chartRows;const lastYear=Number(all[all.length-1].date.slice(0,4));const minYear=chartYears?lastYear-chartYears: Number(all[0].date.slice(0,4));
@@ -773,7 +813,7 @@ function renderChart(){
  cross.appendChild(svgEl('line',{id:'crossH',x1:L,y1:T,x2:W-R,y2:T,stroke:'#e6eef9','stroke-width':1,'stroke-dasharray':'4 4',opacity:.55}));
  cross.appendChild(svgEl('circle',{id:'crossDot',cx:L,cy:T,r:5,fill:'#60a5fa',stroke:'#f8fafc','stroke-width':2}));
  svg.appendChild(cross);
- svg._chart={rows,x,y,px3,py3,L,R,T,B,W,H,PW,PH};
+ svg._chart={rows,x,y,px3,py3,L,R,T,B,W,H,PW,PH};sksi3dDraw(rows);
  svg.onpointermove=event=>{const rect=svg.getBoundingClientRect();const viewX=(event.clientX-rect.left)/rect.width*W;const i=Math.max(0,Math.min(rows.length-1,Math.round((viewX-L)/PW*(rows.length-1))));showChartPoint(i,event.clientX,event.clientY,false);};
  svg.onpointerdown=event=>{const rect=svg.getBoundingClientRect();const viewX=(event.clientX-rect.left)/rect.width*W;const i=Math.max(0,Math.min(rows.length-1,Math.round((viewX-L)/PW*(rows.length-1))));showChartPoint(i,event.clientX,event.clientY,true);};
  svg.onpointerleave=()=>{if(!chartSelected){cross.setAttribute('visibility','hidden');tip.style.display='none';}};
@@ -862,8 +902,8 @@ document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click
  if(chart3DButton)chart3DButton.addEventListener('click',event=>{event.stopPropagation();setChart3D(!chartWrap.classList.contains('is-3d'));});
  if(chartWrap){
    chartWrap.addEventListener('click',event=>{if(event.target.closest('.chart-tip')||event.target.closest('.range-btn')||event.target.closest('#chart3DButton')||event.target.closest('svg'))return;setChart3D(!chartWrap.classList.contains('is-3d'));});
-   chartWrap.addEventListener('pointermove',event=>{if(!chartWrap.classList.contains('is-3d')||event.pointerType==='touch')return;const r=chartWrap.getBoundingClientRect(),nx=(event.clientX-r.left)/r.width-.5,ny=(event.clientY-r.top)/r.height-.5;chartWrap.style.setProperty('--pointer-x',((nx+.5)*100)+'%');chartWrap.style.setProperty('--pointer-y',((ny+.5)*100)+'%');chartWrap.style.setProperty('--chart-tilt-x',(13-ny*9)+'deg');chartWrap.style.setProperty('--chart-tilt-y',(nx*10-2)+'deg');});
-   chartWrap.addEventListener('pointerleave',()=>{chartWrap.style.setProperty('--chart-tilt-x','13deg');chartWrap.style.setProperty('--chart-tilt-y','-2deg');});
+   chartWrap.addEventListener('pointermove',event=>{if(!sksi3dScene||!chartWrap.classList.contains('is-3d')||event.pointerType==='touch')return;const r=chartWrap.getBoundingClientRect();sksi3dScene.yaw=((event.clientX-r.left)/r.width-.5)*.8;sksi3dScene.pitch=.2+((event.clientY-r.top)/r.height)*.45;sksi3dDraw(sksi3dScene.rows);});
+   chartWrap.addEventListener('pointerleave',()=>{if(sksi3dScene){sksi3dScene.yaw=0;sksi3dScene.pitch=.42;if(chartWrap.classList.contains('is-3d'))sksi3dDraw(sksi3dScene.rows);}});
   }
 
  document.querySelectorAll('[data-explore]').forEach(btn=>btn.addEventListener('click',()=>{
