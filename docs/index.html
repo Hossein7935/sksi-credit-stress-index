@@ -518,6 +518,31 @@ body.light .interactive-chart:hover,body.light .interactive-chart.is-exploring,b
 @media(max-width:760px){.interactive-chart:hover,.interactive-chart.is-exploring,.source-spark:hover,.source-spark.is-exploring{transform:none!important}}
 @media(prefers-reduced-motion:reduce){.interactive-chart,.source-spark{transition:none!important;will-change:auto}}
 
+
+/* Purposeful engagement: user-led exploration and meaningful feedback */
+.explore-path{display:grid;grid-template-columns:minmax(0,1.1fr) repeat(3,minmax(0,1fr));gap:10px;align-items:stretch;margin:14px 0 24px;padding:12px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(120deg,rgba(18,35,59,.68),rgba(8,17,31,.48));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.explore-intro{display:flex;flex-direction:column;justify-content:center;padding:8px 12px;gap:5px}
+.explore-kicker{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.explore-title{font-size:14px;line-height:1.35;font-weight:750;color:var(--text)}
+.explore-subtitle{font-size:11px;line-height:1.5;color:var(--muted)}
+.explore-action{position:relative;display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border:1px solid rgba(125,211,252,.14);border-radius:14px;background:rgba(91,143,205,.055);color:var(--text);cursor:pointer;min-width:0;transition:transform .22s ease,border-color .22s ease,background .22s ease,box-shadow .22s ease}
+.explore-action:hover,.explore-action:focus-visible{transform:translateY(-3px);outline:none;border-color:rgba(103,232,249,.52);background:rgba(56,189,248,.1);box-shadow:0 10px 28px rgba(0,0,0,.16),0 0 22px rgba(56,189,248,.07)}
+.explore-num{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:10px;background:linear-gradient(145deg,rgba(59,130,246,.24),rgba(34,211,238,.12));border:1px solid rgba(125,211,252,.22);font-size:11px;font-weight:850;color:#bdeeff}
+.explore-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.explore-copy strong{font-size:12px;line-height:1.35;font-weight:750}
+.explore-copy small{font-size:10px;line-height:1.4;color:var(--muted)}
+.explore-action[aria-current="step"]{border-color:rgba(103,232,249,.65);background:rgba(34,211,238,.1);box-shadow:inset 0 0 0 1px rgba(103,232,249,.08)}
+.sidegrid .mini .delta-value{display:flex;align-items:center;gap:7px;font-size:22px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.delta-value .delta-arrow{font-size:13px;color:var(--muted)}
+.delta-value.up{color:#fb923c}.delta-value.down{color:#4ade80}.delta-value.flat{color:var(--text)}
+.delta-value .delta-arrow{color:inherit}
+body.light .explore-path{background:linear-gradient(120deg,rgba(255,255,255,.92),rgba(235,244,255,.76))}
+body.light .explore-action{background:rgba(59,130,246,.035);border-color:rgba(37,99,235,.13)}
+body.light .explore-action:hover,body.light .explore-action:focus-visible{background:rgba(59,130,246,.07)}
+@media(max-width:900px){.explore-path{grid-template-columns:repeat(3,minmax(0,1fr))}.explore-intro{grid-column:1/-1;padding:4px 8px 8px}}
+@media(max-width:560px){.explore-path{grid-template-columns:1fr;padding:10px;gap:8px}.explore-intro{grid-column:auto}.explore-action{padding:11px}.explore-copy strong{font-size:13px}.explore-copy small{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.explore-action{transition:none}.explore-action:hover{transform:none}}
+
 </style>
 </head>
 <body>
@@ -535,6 +560,12 @@ body.light .interactive-chart:hover,body.light .interactive-chart.is-exploring,b
   <p id="introText">Der SKSI bündelt vier Signale aus dem US-Kreditmarkt zu einem wöchentlichen Gesamtbild. Verfolge, wie sich die Kreditbedingungen verändern – vom ruhigen Markt bis zu Phasen erhöhter Anspannung.</p>
   <div class="intro-tags"><span id="introTag1">Wöchentlich aktualisiert</span><span id="introTag2">Historie seit 1997</span><span id="introTag3">Vier Marktsignale</span></div><div class="scroll-cue" id="scrollCue"><span class="cue-line"></span><span id="scrollCueText">WEITER ENTDECKEN</span><span class="cue-arrow" aria-hidden="true">↓</span></div>
 </section>
+<nav class="explore-path" id="explorePath" aria-label="Analyse entdecken">
+ <div class="explore-intro"><span class="explore-kicker" id="exploreKicker">DEIN ANALYSEPFAD</span><strong class="explore-title" id="exploreTitle">Entdecke die Signale in deinem Tempo</strong><span class="explore-subtitle" id="exploreSubtitle">Wähle einen Einstieg – du behältst die Kontrolle.</span></div>
+ <button class="explore-action" type="button" data-explore="score" aria-current="step"><span class="explore-num">01</span><span class="explore-copy"><strong id="exploreOne">Aktuelle Lage</strong><small id="exploreOneSub">Was sagt der Wert?</small></span></button>
+ <button class="explore-action" type="button" data-explore="components"><span class="explore-num">02</span><span class="explore-copy"><strong id="exploreTwo">Vier Signale</strong><small id="exploreTwoSub">Was bewegt den Index?</small></span></button>
+ <button class="explore-action" type="button" data-explore="mainChart"><span class="explore-num">03</span><span class="explore-copy"><strong id="exploreThree">Historie erkunden</strong><small id="exploreThreeSub">Vergleiche frühere Phasen</small></span></button>
+</nav>
 <section class="hero">
   <article class="panel">
     <div class="eyebrow">Aktueller Wochenwert</div>
@@ -548,6 +579,7 @@ body.light .interactive-chart:hover,body.light .interactive-chart.is-exploring,b
     <div class="mini"><div class="label">Quorum – alle vier Signale erhöht</div><strong id="quorum">—</strong><small id="quorumDetail">Gemeinsames Stresssignal</small></div>
     <div class="mini"><div class="label">Letzte verfügbare Woche</div><strong id="date">—</strong><small>Datum der Daten, nicht der Seitenaufruf</small></div>
     <div class="mini"><div class="label">Modell-Basis</div><strong>1997–2006</strong><small>Kalibrierung bleibt eingefroren</small></div>
+<div class="mini"><div class="label" id="trendLabel">Veränderung zur Vorwoche</div><strong class="delta-value flat" id="weeklyDelta">—</strong><small id="trendHint">Vergleich mit dem vorherigen Wochenwert</small></div>
   </aside>
 </section>
 <section class="section">
@@ -633,7 +665,7 @@ function showChartPoint(i,cx,cy,lock){
  if(lock){chartSelected=true;window.setTimeout(()=>{chartSelected=false;},5000);}
 }
 async function loadChart(){
- try{const r=await fetch(CSV_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('CSV HTTP '+r.status);const csv=await r.text();chartRows=csv.trim().split(/\r?\n/).slice(1).map(line=>{const p=line.split(',');return {date:p[0],score:Number(p[1]),regime:p[2],quorum:p[3]};}).filter(r=>r.date&&Number.isFinite(r.score));renderChart();}
+ try{const r=await fetch(CSV_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('CSV HTTP '+r.status);const csv=await r.text();chartRows=csv.trim().split(/\r?\n/).slice(1).map(line=>{const p=line.split(',');return {date:p[0],score:Number(p[1]),regime:p[2],quorum:p[3]};}).filter(r=>r.date&&Number.isFinite(r.score));renderChart();updateWeeklyDelta();}
  catch(e){$('historyChart').replaceChildren(svgEl('text',{x:500,y:175,fill:'#fda4af','text-anchor':'middle','font-size':15},tr('chartfailed')));$('loadError').textContent=tr('charterror')+e.message;}
 }
 
@@ -669,6 +701,15 @@ function applyLanguage(lang){
  $('brandTitle').textContent=({de:'SKSI · Kreditstress-Index',en:'SKSI · Credit Stress Index',es:'SKSI · Índice de estrés crediticio',ar:'SKSI · مؤشر ضغوط الائتمان'})[currentLang];
  $('introKicker').textContent=({de:'WÖCHENTLICHER KREDITMARKT-BRIEF',en:'WEEKLY CREDIT MARKET BRIEF',es:'INFORME SEMANAL DEL MERCADO DE CRÉDITO',ar:'موجز أسبوعي لسوق الائتمان'})[currentLang];
  $('introTitle').textContent=d.introTitle;$('introText').textContent=d.introText;$('introTag1').textContent=d.introTag1;$('introTag2').textContent=d.introTag2;$('introTag3').textContent=d.introTag3;
+  const exploreCopy={
+   de:['DEIN ANALYSEPFAD','Entdecke die Signale in deinem Tempo','Wähle einen Einstieg – du behältst die Kontrolle.','Aktuelle Lage','Was sagt der Wert?','Vier Signale','Was bewegt den Index?','Historie erkunden','Vergleiche frühere Phasen','Veränderung zur Vorwoche','Vergleich mit dem vorherigen Wochenwert','gestiegen','gesunken','unverändert'],
+   en:['YOUR EXPLORATION PATH','Explore the signals at your own pace','Choose where to begin—you stay in control.','Current picture','What does the reading say?','Four signals','What moves the index?','Explore history','Compare earlier periods','Change vs. previous week','Compared with the previous weekly reading','up','down','unchanged'],
+   es:['TU RUTA DE ANÁLISIS','Explora las señales a tu ritmo','Elige por dónde empezar; tú tienes el control.','Situación actual','¿Qué indica el valor?','Cuatro señales','¿Qué mueve el índice?','Explorar historial','Compara períodos anteriores','Cambio frente a la semana anterior','Comparado con la lectura semanal anterior','subió','bajó','sin cambios'],
+   ar:['مسار الاستكشاف','استكشف المؤشرات بالسرعة التي تناسبك','اختر نقطة البداية؛ أنت تتحكم بالتجربة.','الوضع الحالي','ماذا تعني القراءة؟','أربع إشارات','ما الذي يحرك المؤشر؟','استكشف السجل','قارن الفترات السابقة','التغير عن الأسبوع السابق','مقارنة بالقراءة الأسبوعية السابقة','ارتفع','انخفض','دون تغيير']
+  }[currentLang];
+  ['exploreKicker','exploreTitle','exploreSubtitle','exploreOne','exploreOneSub','exploreTwo','exploreTwoSub','exploreThree','exploreThreeSub','trendLabel','trendHint'].forEach((id,i)=>{const el=$(id);if(el&&exploreCopy[i]!==undefined)el.textContent=exploreCopy[i];});
+  const pathNav=document.getElementById('explorePath');if(pathNav)pathNav.setAttribute('aria-label',exploreCopy[0]);
+  if(chartRows.length)updateWeeklyDelta();
  $('signalsLead').textContent=d.signalsLead;$('historyLead').textContent=d.historyLead;$('methodLead').textContent=d.methodLead;
  $('methodTitle').textContent=({de:'Daten mit Kontext lesen',en:'Read the data in context',es:'Interpreta los datos en contexto',ar:'اقرأ البيانات ضمن سياقها'})[currentLang];
  document.querySelector('.hero .eyebrow').textContent=d.current;$('regimeText').textContent=d.regime;document.querySelectorAll('.ticks span').forEach((e,i)=>e.textContent=d.ticks[i]);
@@ -694,6 +735,11 @@ document.getElementById('themeToggle').addEventListener('click',()=>setTheme(doc
 document.getElementById('languageSelect').addEventListener('change',e=>applyLanguage(e.target.value));
 try{document.getElementById('languageSelect').value=localStorage.getItem(LANG_KEY)||'de'}catch(e){}
 document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click',()=>{chartYears=Number(btn.dataset.years);document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',b===btn));chartSelected=false;renderChart();}));
+ document.querySelectorAll('[data-explore]').forEach(btn=>btn.addEventListener('click',()=>{
+  const id=btn.dataset.explore,target=id==='score'?document.getElementById('score'):document.getElementById(id);
+  if(target)target.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:id==='score'?'center':'start'});
+  document.querySelectorAll('[data-explore]').forEach(b=>b.setAttribute('aria-current',b===btn?'step':'false'));
+ }));
 // Pointer-following light for subtle 3D chart interaction.
  document.querySelectorAll('.interactive-chart,.source-spark').forEach(surface=>{
   surface.addEventListener('pointermove',event=>{
@@ -712,6 +758,17 @@ document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click
 
 const DATA_URL='https://raw.githubusercontent.com/Hossein7935/sksi-credit-stress-index/main/data/latest.json';
 const CSV_URL='https://raw.githubusercontent.com/Hossein7935/sksi-credit-stress-index/main/data/sksi_weekly.csv';
+function updateWeeklyDelta(){
+ const el=document.getElementById('weeklyDelta');if(!el||chartRows.length<2)return;
+ const a=chartRows[chartRows.length-2],b=chartRows[chartRows.length-1],delta=Number(b.score)-Number(a.score);
+ if(!Number.isFinite(delta))return;
+ const words={de:['gestiegen','gesunken','unverändert'],en:['up','down','unchanged'],es:['subió','bajó','sin cambios'],ar:['ارتفع','انخفض','دون تغيير']}[currentLang]||['gestiegen','gesunken','unverändert'];
+ const trend=delta>.005?0:delta<-.005?1:2;
+ el.className='delta-value '+(trend===0?'up':trend===1?'down':'flat');el.replaceChildren();
+ const arrow=document.createElement('span');arrow.className='delta-arrow';arrow.textContent=trend===0?'↑':trend===1?'↓':'→';el.appendChild(arrow);
+ const value=document.createElement('span');value.textContent=(delta>0?'+':'')+fmt(delta,2);el.appendChild(value);
+ el.setAttribute('aria-label',words[trend]+' '+fmt(Math.abs(delta),2)+' Punkte');
+}
 const $=id=>document.getElementById(id);
 const fmt=(n,d=2)=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
 function regimeInfo(regime){return ({normal:{label:'RUHIG',color:'#4ade80',bg:'#183b2b'},watch:{label:'ERHÖHT',color:'#facc15',bg:'#463915'},stress:{label:'STRESS',color:'#fb923c',bg:'#482719'},severe:{label:'SCHWERER STRESS',color:'#fb7185',bg:'#4a1d2a'}})[regime]||{label:String(regime||'UNBEKANNT').toUpperCase(),color:'#9aabc2',bg:'#25344a'};}
@@ -817,7 +874,7 @@ $('refresh').addEventListener('click',loadData);loadData().then(()=>{applyLangua
   body.classList.add('js-scroll');
   const reveal=new IntersectionObserver(entries=>entries.forEach(entry=>{entry.target.classList.toggle('in-view',entry.isIntersecting);}),{threshold:.08,rootMargin:'0px 0px -6% 0px'});
   document.querySelectorAll('.intro-panel,.hero,.section,.method-strip,.footer').forEach(el=>reveal.observe(el));
-  const active=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;const idx=id==='components'?2:id==='mainChart'?3:id==='score'||id==='regime'?1:id==='methodTitle'?4:id==='introTitle'?0:0;buttons.forEach((b,i)=>{const on=i===idx;b.setAttribute('aria-current',on?'step':'false');});}}),{threshold:.3,rootMargin:'-20% 0px -35% 0px'});
+  const active=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;const idx=id==='components'?2:id==='mainChart'?3:id==='score'||id==='regime'?1:id==='methodTitle'?4:id==='introTitle'?0:0;buttons.forEach((b,i)=>{const on=i===idx;b.setAttribute('aria-current',on?'step':'false');});document.querySelectorAll('[data-explore]').forEach((b,i)=>b.setAttribute('aria-current',i===Math.max(0,idx-1)&&i<3?'step':'false'));}}),{threshold:.3,rootMargin:'-20% 0px -35% 0px'});
   [document.getElementById('introTitle'),document.getElementById('score'),document.getElementById('components'),document.getElementById('mainChart'),document.getElementById('methodTitle')].filter(Boolean).forEach(el=>active.observe(el));
  }else document.querySelectorAll('.intro-panel,.hero,.section,.method-strip,.footer').forEach(el=>el.classList.add('in-view'));
 })();
