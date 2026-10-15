@@ -588,6 +588,52 @@ body.light .source-spark.is-expanded svg .mini-line{stroke:#075985!important;fil
 body.light .source-spark.is-expanded{background:transparent!important;box-shadow:none!important;border-color:transparent!important}
 @media(max-width:760px){.source-spark.is-expanded{background:transparent!important;border:0!important;box-shadow:none!important}}
 
+
+/* Complete light theme: glass surfaces and light chart canvases */
+body.light{
+ --bg:#edf3fb;--panel:rgba(255,255,255,.64);--panel2:rgba(255,255,255,.52);
+ --line:rgba(91,119,158,.2);--text:#17243a;--muted:#5e708a;--blue:#175fca;
+ --chart-bg:rgba(247,250,255,.82);--chart-grid:rgba(101,126,163,.2);
+ --chart-text:#425671;--chart-line:rgba(107,132,168,.15);--chart-cross:#334155;
+ background:radial-gradient(ellipse at 12% 0%,rgba(96,165,250,.2),transparent 35%),radial-gradient(ellipse at 90% 14%,rgba(45,212,191,.12),transparent 30%),linear-gradient(180deg,#f7faff 0%,#eaf1fa 100%)!important;
+ color:var(--text)!important
+}
+body.light .panel,body.light .mini,body.light .component,body.light .chartbox.panel,body.light .explore-path{
+ background:linear-gradient(145deg,rgba(255,255,255,.76),rgba(239,246,255,.56))!important;
+ border:1px solid rgba(91,119,158,.2)!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.92),inset 0 -1px 0 rgba(130,157,194,.06),0 18px 42px rgba(43,70,111,.09)!important;
+ backdrop-filter:blur(22px) saturate(145%)!important;-webkit-backdrop-filter:blur(22px) saturate(145%)!important
+}
+body.light .component:before,body.light .hero>.panel:first-child:before{background:linear-gradient(90deg,transparent,rgba(67,126,210,.3),transparent)!important}
+body.light .interactive-chart,body.light .source-spark:not(.is-expanded){
+ background:linear-gradient(145deg,rgba(250,252,255,.9),rgba(232,241,253,.7))!important;
+ border:1px solid rgba(91,119,158,.2)!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 8px 24px rgba(43,70,111,.06)!important;
+ backdrop-filter:blur(16px) saturate(135%)!important;-webkit-backdrop-filter:blur(16px) saturate(135%)!important
+}
+body.light .interactive-chart svg,body.light .source-spark svg{background:transparent!important}
+body.light .source-spark svg .mini-bg{fill:rgba(244,248,255,.62)!important}
+body.light .source-spark svg .mini-grid{stroke:rgba(100,126,165,.24)!important}
+body.light .source-spark svg .mini-vgrid{stroke:rgba(100,126,165,.16)!important}
+body.light .source-spark svg .mini-text{fill:#516681!important}
+body.light .source-spark svg .mini-line{stroke:#1769d2!important;filter:drop-shadow(0 0 2px rgba(37,99,235,.3))!important}
+body.light .source-hover-tip,body.light .chart-tip{
+ background:rgba(248,251,255,.9)!important;color:#1c2e48!important;border-color:rgba(73,106,153,.28)!important;
+ box-shadow:0 14px 32px rgba(43,70,111,.14)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important
+}
+body.light .chart-tip span{color:#5d708a!important}
+body.light .chart-tools{background:rgba(237,244,253,.62)!important;border-color:rgba(91,119,158,.18)!important;backdrop-filter:blur(14px)!important}
+body.light .range-btn{background:rgba(255,255,255,.62)!important;border-color:rgba(91,119,158,.2)!important;color:#4b607b!important}
+body.light .range-btn.active,body.light .range-btn:hover{background:rgba(210,229,255,.8)!important;color:#164ea6!important;border-color:rgba(37,99,235,.4)!important}
+body.light .btn,body.light .linkbtn{background:rgba(255,255,255,.65)!important;border-color:rgba(91,119,158,.2)!important;color:#233650!important;backdrop-filter:blur(14px)!important}
+body.light .regime{background:rgba(34,197,94,.12)!important}
+body.light .source-spark.is-expanded{background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.light .source-spark.is-expanded:before{background:radial-gradient(ellipse at center,rgba(34,211,238,.22),rgba(99,102,241,.11) 42%,transparent 73%)!important}
+body.light .source-spark.is-expanded:after{background:linear-gradient(115deg,transparent 12%,rgba(37,99,235,.03) 33%,rgba(255,255,255,.75) 48%,rgba(96,165,250,.12) 53%,transparent 76%)!important}
+body.light .source-spark.is-expanded svg .mini-line{stroke:#0757b7!important;filter:drop-shadow(0 0 4px rgba(14,116,220,.6)) drop-shadow(0 0 13px rgba(59,130,246,.35))!important}
+body.light .summary{color:#3d506a!important}
+@media(prefers-reduced-transparency:reduce){body.light .panel,body.light .mini,body.light .component,body.light .chartbox.panel,body.light .interactive-chart,body.light .source-spark:not(.is-expanded){backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(255,255,255,.96)!important}}
+
 </style>
 </head>
 <body>
