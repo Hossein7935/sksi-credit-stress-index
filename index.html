@@ -453,6 +453,25 @@ body.light .intro-panel{background:radial-gradient(ellipse at 82% 20%,rgba(59,13
 @media(max-width:760px){body:before{animation-duration:65s}body:after{filter:blur(32px)}}
 @media(prefers-reduced-motion:reduce){body:before{animation:none!important}body:after{transition:none!important;transform:none!important}.js-scroll .intro-panel:not(.in-view),.js-scroll .hero:not(.in-view),.js-scroll .section:not(.in-view),.js-scroll .method-strip:not(.in-view),.js-scroll .footer:not(.in-view){opacity:1;filter:none;transform:none}}
 
+
+/* Deep-space holographic chart deck */
+.interactive-chart,.source-spark{transform-origin:center center;backface-visibility:hidden;isolation:isolate}
+.interactive-chart{z-index:1;overflow:visible!important;border:1px solid rgba(125,211,252,.22)!important;background:linear-gradient(145deg,rgba(8,19,36,.84),rgba(4,10,21,.76))!important;backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%)}
+.interactive-chart:before,.source-spark:before{inset:-1px!important;border:1px solid rgba(125,211,252,.2);background:radial-gradient(ellipse at var(--pointer-x) var(--pointer-y),rgba(103,232,249,.22),rgba(59,130,246,.09) 25%,rgba(99,102,241,.035) 48%,transparent 72%)!important}
+.interactive-chart:after,.source-spark:after{inset:-1px!important;background:linear-gradient(125deg,transparent 20%,rgba(125,211,252,.025) 37%,rgba(186,230,253,.23) 49%,rgba(255,255,255,.1) 51%,rgba(96,165,250,.045) 55%,transparent 70%)!important;background-size:260% 180%!important}
+.interactive-chart:hover,.interactive-chart.is-exploring{z-index:40;transform:perspective(950px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateY(-14px) scale(1.065)!important;border-color:rgba(125,211,252,.9)!important;box-shadow:inset 0 1px 0 rgba(240,249,255,.24),inset 0 -22px 46px rgba(14,165,233,.09),0 38px 85px rgba(0,0,0,.5),0 0 0 1px rgba(125,211,252,.23),0 0 65px rgba(14,165,233,.22)!important}
+.source-spark:hover,.source-spark.is-exploring{z-index:50;transform:perspective(800px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateY(-10px) scale(1.09)!important;border-color:rgba(125,211,252,.95)!important;background:rgba(5,14,27,.72)!important;box-shadow:inset 0 1px 0 rgba(240,249,255,.22),0 28px 58px rgba(0,0,0,.42),0 0 0 1px rgba(125,211,252,.2),0 0 44px rgba(14,165,233,.2)!important}
+.component:has(.source-spark:hover),.component:has(.source-spark.is-exploring){z-index:60;position:relative}
+.interactive-chart:hover svg,.interactive-chart.is-exploring svg{filter:drop-shadow(0 12px 24px rgba(0,0,0,.28)) drop-shadow(0 0 16px rgba(56,189,248,.1))}
+.interactive-chart:hover svg polyline,.interactive-chart.is-exploring svg polyline{stroke-width:3.2;filter:drop-shadow(0 0 5px rgba(125,211,252,.95)) drop-shadow(0 0 15px rgba(56,189,248,.65)) drop-shadow(0 0 29px rgba(99,102,241,.25))}
+.source-spark:hover svg,.source-spark.is-exploring svg{filter:drop-shadow(0 9px 16px rgba(0,0,0,.24))}
+.source-spark:hover svg .mini-line,.source-spark.is-exploring svg .mini-line{stroke:#b6f2ff!important;stroke-width:3.5!important;filter:drop-shadow(0 0 4px rgba(186,230,253,1)) drop-shadow(0 0 12px rgba(56,189,248,.95)) drop-shadow(0 0 24px rgba(99,102,241,.48))}
+.interactive-chart .chart-tip{z-index:8;background:rgba(4,12,25,.88)!important;border-color:rgba(165,243,252,.68)!important;box-shadow:0 18px 48px rgba(0,0,0,.4),0 0 28px rgba(56,189,248,.2)!important;backdrop-filter:blur(22px) saturate(150%)!important;-webkit-backdrop-filter:blur(22px) saturate(150%)!important}
+.source-hover-tip{background:rgba(4,12,25,.86)!important;border-color:rgba(165,243,252,.7)!important;box-shadow:0 12px 32px rgba(0,0,0,.38),0 0 22px rgba(56,189,248,.18)!important;backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%)}
+body.light .interactive-chart,body.light .source-spark{background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(235,244,255,.82))!important}
+body.light .interactive-chart .chart-tip,body.light .source-hover-tip{background:rgba(255,255,255,.86)!important}
+@media(hover:none),(prefers-reduced-motion:reduce){.interactive-chart:hover,.interactive-chart.is-exploring,.source-spark:hover,.source-spark.is-exploring{transform:none!important;z-index:1;backdrop-filter:none;-webkit-backdrop-filter:none}.interactive-chart,.source-spark{overflow:hidden!important}.component:has(.source-spark:hover),.component:has(.source-spark.is-exploring){z-index:auto}}
+
 </style>
 </head>
 <body>
@@ -636,7 +655,7 @@ document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click
    surface.style.setProperty('--pointer-x',((event.clientX-rect.left)/rect.width*100)+'%');
    surface.style.setProperty('--pointer-y',((event.clientY-rect.top)/rect.height*100)+'%');
    const nx=((event.clientX-rect.left)/rect.width-.5)*2,ny=((event.clientY-rect.top)/rect.height-.5)*2;
-   surface.style.setProperty('--tilt-x',(-ny*2.2)+'deg');surface.style.setProperty('--tilt-y',(nx*2.2)+'deg');surface.classList.add('is-exploring');
+   surface.style.setProperty('--tilt-x',(-ny*30)+'deg');surface.style.setProperty('--tilt-y',(nx*30)+'deg');surface.classList.add('is-exploring');
   });
   surface.addEventListener('pointerleave',()=>{
    surface.style.setProperty('--pointer-x','50%');surface.style.setProperty('--pointer-y','50%');
