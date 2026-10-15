@@ -10,6 +10,9 @@
 :root{color-scheme:dark;--bg:#080e19;--panel:#111b2b;--panel2:#0d1625;--line:#25344a;--text:#edf3fc;--muted:#9aabc2;--blue:#7cb8ff;--green:#4ade80;--yellow:#facc15;--orange:#fb923c;--red:#fb7185}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a3150 0,transparent 55%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 main{max-width:1120px;margin:auto;padding:28px 20px 56px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#60a5fa,#2563eb);display:grid;place-items:center;font-weight:900;color:#071326;letter-spacing:-1px}.eyebrow{color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}.brand h1{font-size:22px;margin:0;letter-spacing:-.04em}.subtitle{color:var(--muted);margin:2px 0 0;font-size:13px}.actions{display:flex;gap:10px;align-items:center}.btn,.linkbtn{border:1px solid var(--line);background:#132035;color:var(--text);padding:9px 13px;border-radius:10px;font:inherit;font-size:13px;text-decoration:none;cursor:pointer}.btn:hover,.linkbtn:hover{border-color:var(--blue)}.statusline{color:var(--muted);font-size:12px;margin:0 0 14px}.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr);gap:16px}.panel{background:linear-gradient(145deg,rgba(20,32,51,.96),rgba(12,21,35,.98));border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 12px 40px #0002}.panel h2{font-size:15px;margin:0 0 14px;letter-spacing:-.01em}.scoreline{display:flex;align-items:flex-end;gap:10px;margin:8px 0 12px}.score{font-size:clamp(56px,9vw,82px);font-weight:800;letter-spacing:-.08em;line-height:1}.outof{color:var(--muted);font-size:17px;padding-bottom:9px}.regime{display:inline-flex;align-items:center;gap:8px;border-radius:99px;padding:6px 11px;font-size:12px;font-weight:800;letter-spacing:.02em;background:#183b2b;color:var(--green)}.dot{width:7px;height:7px;border-radius:50%;background:currentColor}.gauge{height:11px;border-radius:99px;background:linear-gradient(90deg,#34d399 0 48%,#facc15 48% 68%,#fb923c 68% 84%,#fb7185 84% 100%);margin:23px 0 7px;position:relative}.needle{position:absolute;top:-5px;width:3px;height:21px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px #0b1220;left:0;transform:translateX(-50%)}.ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.summary{color:#d5e0ee;margin:18px 0 0;max-width:60ch}.sidegrid{display:grid;gap:12px}.mini{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:14px}.mini .label{color:var(--muted);font-size:12px}.mini strong{display:block;font-size:20px;margin-top:4px}.mini small{color:var(--muted)}.section{margin-top:18px}.sectionhead{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}.sectionhead h2{margin:0;font-size:17px}.sectionhead p{margin:0;color:var(--muted);font-size:12px}.components{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.component{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}.component .cname{color:var(--muted);font-size:12px;min-height:36px}.component .value{font-size:27px;font-weight:750;letter-spacing:-.04em;margin:4px 0}.component .unit{font-size:12px;color:var(--muted);font-weight:500}.state{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}.zscore{font-size:12px;color:var(--muted);margin-top:7px}.chartbox{overflow:hidden}.chart{width:100%;display:block;border-radius:10px;background:#fff}.note{color:var(--muted);font-size:12px;margin:12px 0 0}.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:20px;color:var(--muted);font-size:12px}.footer a{color:var(--blue);text-decoration:none}.error{color:#fda4af}.hidden{display:none}@media(max-width:760px){main{padding:18px 12px 36px}.hero{grid-template-columns:1fr}.components{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:17px}.brand h1{font-size:19px}}@media(max-width:390px){.components{grid-template-columns:1fr 1fr}.component{padding:12px}.component .value{font-size:23px}}
+
+.chart-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.range-btn{border:1px solid var(--line);background:#0c1625;color:var(--muted);border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer}.range-btn.active,.range-btn:hover{color:var(--text);border-color:var(--blue);background:#172a43}.interactive-chart{position:relative;width:100%;min-height:270px;background:#0b1422;border:1px solid #26364c;border-radius:12px;overflow:hidden;touch-action:pan-y}.interactive-chart svg{display:block;width:100%;height:auto;min-height:260px;cursor:crosshair}.chart-tip{position:absolute;z-index:2;pointer-events:none;display:none;min-width:150px;padding:9px 11px;border:1px solid #3a4b64;border-radius:9px;background:#07101eeF;box-shadow:0 6px 24px #0005;font-size:12px;color:#edf3fc}.chart-tip strong{display:block;font-size:16px;margin:2px 0}.chart-tip span{color:#a8b8ce}.chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}.legend-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.component-link{display:block;color:inherit;text-decoration:none;transition:border-color .15s,transform .15s}.component-link:hover{border-color:var(--blue);transform:translateY(-2px)}.source-link{display:inline-block;color:var(--blue);font-size:11px;text-decoration:none;margin-top:8px}.source-link:hover{text-decoration:underline}.component .cname{min-height:36px}@media(max-width:600px){.interactive-chart{min-height:220px}.interactive-chart svg{min-height:220px}.chart-tip{font-size:11px;min-width:130px}}
+
 </style>
 </head>
 <body>
@@ -44,13 +47,70 @@ main{max-width:1120px;margin:auto;padding:28px 20px 56px}.top{display:flex;justi
   </div>
 </section>
 <section class="section panel chartbox">
-  <div class="sectionhead"><h2>Historischer Verlauf seit 1997</h2><p>Wöchentlicher SKSI-Wert</p></div>
-  <img class="chart" src="./docs/history.svg" alt="Historischer Verlauf des SKSI-Kreditstress-Index seit 1997" loading="lazy">
-  <p class="note">Die Historie wird aus den veröffentlichten Wochenwerten erstellt. Die Darstellung ist ein rückblickender Indikator und keine sichere Vorhersage.</p>
+  <div class="sectionhead"><h2>Historischer Verlauf seit 1997</h2><div class="chart-tools" role="group" aria-label="Zeitraum wählen"><button class="range-btn" data-years="5">5 J.</button><button class="range-btn" data-years="10">10 J.</button><button class="range-btn active" data-years="0">Max.</button></div></div>
+  <div class="interactive-chart" id="chartWrap" aria-label="Interaktiver Kreditstress-Chart">
+    <svg id="historyChart" viewBox="0 0 1000 360" role="img" aria-label="Interaktiver Verlauf des SKSI-Index mit Jahresachse"><text x="500" y="175" fill="#9aabc2" text-anchor="middle" font-size="16">Historische Daten werden geladen …</text></svg>
+    <div class="chart-tip" id="chartTip"></div>
+  </div>
+  <div class="chart-legend"><span><i class="legend-dot" style="background:#60a5fa"></i>SKSI-Wert</span><span><i class="legend-dot" style="background:#facc15"></i>Erhöht ab 48</span><span><i class="legend-dot" style="background:#fb923c"></i>Stress ab 68</span><span><i class="legend-dot" style="background:#fb7185"></i>Schwer ab 84</span></div>
+  <p class="note">Bewege den Mauszeiger über die Linie oder tippe auf den Chart, um Datum und Wert zu sehen. Mit 5 J. / 10 J. / Max. kannst du den Zeitraum ändern. Historische Daten sind rückblickend und keine sichere Vorhersage.</p>
 </section>
 <footer class="footer"><span id="loadError" class="error"></span><span>Quelle: ICE BofA OAS, Moody’s Corporate Bond Yields und Chicago Fed NFCI via FRED.</span><span><a href="https://github.com/Hossein7935/sksi-credit-stress-index/blob/main/README.md" target="_blank" rel="noreferrer">Methodik & Grenzen ↗</a> · Keine Anlageberatung.</span></footer>
 </main>
 <script>
+
+const SOURCES={
+ hy:{label:'Quelle: FRED / ICE BofA HY OAS ↗',url:'https://fred.stlouisfed.org/series/BAMLH0A0HYM2'},
+ ig:{label:'Quelle: FRED / ICE BofA IG OAS ↗',url:'https://fred.stlouisfed.org/series/BAMLC0A0CM'},
+ def:{label:'Quelle: Moody’s Baa − Aaa via FRED ↗',url:'https://fred.stlouisfed.org/series/DBAA'},
+ nfci:{label:'Quelle: Chicago Fed / FRED NFCI ↗',url:'https://fred.stlouisfed.org/series/NFCI'}
+};
+let chartRows=[],chartYears=0,chartSelected=null;
+const NS='http://www.w3.org/2000/svg';
+function svgEl(tag,attrs={},txt=''){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;return e;}
+function renderChart(){
+ const svg=$('historyChart'),wrap=$('chartWrap'),tip=$('chartTip');if(!svg||!chartRows.length)return;
+ const all=chartRows;const lastYear=Number(all[all.length-1].date.slice(0,4));const minYear=chartYears?lastYear-chartYears: Number(all[0].date.slice(0,4));
+ const rows=all.filter(r=>Number(r.date.slice(0,4))>=minYear);if(rows.length<2)return;
+ const W=1000,H=360,L=62,R=22,T=24,B=45,PW=W-L-R,PH=H-T-B;
+ const x=i=>L+(i/(rows.length-1))*PW,y=v=>T+(100-Math.max(0,Math.min(100,v)))/100*PH;
+ svg.replaceChildren();svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+ // Subtle plot background and grid
+ svg.appendChild(svgEl('rect',{x:L,y:T,width:PW,height:PH,fill:'#0b1422'}));
+ [0,20,40,60,80,100].forEach(v=>{const yy=y(v);svg.appendChild(svgEl('line',{x1:L,y1:yy,x2:W-R,y2:yy,stroke:'#26364a','stroke-width':1}));svg.appendChild(svgEl('text',{x:L-12,y:yy+4,fill:'#93a6bf','font-size':12,'text-anchor':'end'},String(v)));});
+ [{v:48,c:'#facc15'},{v:68,c:'#fb923c'},{v:84,c:'#fb7185'}].forEach(t=>{svg.appendChild(svgEl('line',{x1:L,y1:y(t.v),x2:W-R,y2:y(t.v),stroke:t.c,'stroke-width':1.3,'stroke-dasharray':'6 5',opacity:.8}));});
+ const firstYear=Number(rows[0].date.slice(0,4)),last=Number(rows[rows.length-1].date.slice(0,4));
+ const tickStep=last-firstYear>22?5:last-firstYear>12?2:1;
+ for(let yr=Math.ceil(firstYear/tickStep)*tickStep;yr<=last;yr+=tickStep){let i=rows.findIndex(r=>Number(r.date.slice(0,4))>=yr);if(i<0)continue;const xx=x(i);svg.appendChild(svgEl('line',{x1:xx,y1:T,x2:xx,y2:H-B,stroke:'#1d2b3e','stroke-width':1}));svg.appendChild(svgEl('text',{x:xx,y:H-17,fill:'#a7b6ca','font-size':12,'text-anchor':'middle'},String(yr)));}
+ const points=rows.map((r,i)=>x(i)+','+y(r.score)).join(' ');
+ const area='M '+x(0)+' '+y(0)+' L '+rows.map((r,i)=>x(i)+' '+y(r.score)).join(' L ')+' L '+x(rows.length-1)+' '+y(0)+' Z';
+ svg.appendChild(svgEl('path',{d:area,fill:'#60a5fa',opacity:.09}));
+ svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:'#60a5fa','stroke-width':2.4,'stroke-linejoin':'round','stroke-linecap':'round'}));
+ const cross=svgEl('g',{id:'crosshair',visibility:'hidden'});
+ cross.appendChild(svgEl('line',{id:'crossV',x1:L,y1:T,x2:L,y2:H-B,stroke:'#e6eef9','stroke-width':1,'stroke-dasharray':'4 4',opacity:.8}));
+ cross.appendChild(svgEl('line',{id:'crossH',x1:L,y1:T,x2:W-R,y2:T,stroke:'#e6eef9','stroke-width':1,'stroke-dasharray':'4 4',opacity:.55}));
+ cross.appendChild(svgEl('circle',{id:'crossDot',cx:L,cy:T,r:5,fill:'#60a5fa',stroke:'#f8fafc','stroke-width':2}));
+ svg.appendChild(cross);
+ svg._chart={rows,x,y,L,R,T,B,W,H,PW,PH};
+ svg.onpointermove=event=>{const rect=svg.getBoundingClientRect();const viewX=(event.clientX-rect.left)/rect.width*W;const i=Math.max(0,Math.min(rows.length-1,Math.round((viewX-L)/PW*(rows.length-1))));showChartPoint(i,event.clientX,event.clientY,false);};
+ svg.onpointerdown=event=>{const rect=svg.getBoundingClientRect();const viewX=(event.clientX-rect.left)/rect.width*W;const i=Math.max(0,Math.min(rows.length-1,Math.round((viewX-L)/PW*(rows.length-1))));showChartPoint(i,event.clientX,event.clientY,true);};
+ svg.onpointerleave=()=>{if(!chartSelected){cross.setAttribute('visibility','hidden');tip.style.display='none';}};
+ $('updated').dataset.chartRange=chartYears?'letzte '+chartYears+' Jahre':'gesamte Historie';
+}
+function showChartPoint(i,cx,cy,lock){
+ const svg=$('historyChart'),tip=$('chartTip'),wrap=$('chartWrap');if(!svg._chart)return;const c=svg._chart,r=c.rows[i];if(!r)return;
+ const px=c.x(i),py=c.y(r.score),cross=svg.querySelector('#crosshair');cross.setAttribute('visibility','visible');svg.querySelector('#crossV').setAttribute('x1',px);svg.querySelector('#crossV').setAttribute('x2',px);svg.querySelector('#crossH').setAttribute('y1',py);svg.querySelector('#crossH').setAttribute('y2',py);svg.querySelector('#crossDot').setAttribute('cx',px);svg.querySelector('#crossDot').setAttribute('cy',py);
+ tip.innerHTML='<span>'+r.date.split('-').reverse().join('.')+'</span><strong>'+fmt(r.score,2)+' / 100</strong><span>'+({normal:'Ruhig',watch:'Erhöht',stress:'Stress',severe:'Schwerer Stress'}[r.regime]||r.regime)+(r.quorum==='1'?' · Quorum':'')+'</span>';tip.style.display='block';
+ const wr=wrap.getBoundingClientRect();let left=cx-wr.left+12,top=cy-wr.top-65;if(left+160>wr.width)left=Math.max(6,left-175);if(top<5)top=cy-wr.top+14;tip.style.left=Math.max(5,Math.min(wr.width-165,left))+'px';tip.style.top=top+'px';
+ if(lock){chartSelected=true;window.setTimeout(()=>{chartSelected=false;},5000);}
+}
+async function loadChart(){
+ try{const r=await fetch(CSV_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('CSV HTTP '+r.status);const csv=await r.text();chartRows=csv.trim().split(/\r?\n/).slice(1).map(line=>{const p=line.split(',');return {date:p[0],score:Number(p[1]),regime:p[2],quorum:p[3]};}).filter(r=>r.date&&Number.isFinite(r.score));renderChart();}
+ catch(e){$('historyChart').replaceChildren(svgEl('text',{x:500,y:175,fill:'#fda4af','text-anchor':'middle','font-size':15},'Historischer Verlauf konnte nicht geladen werden.'));$('loadError').textContent='Chart-Fehler: '+e.message;}
+}
+document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click',()=>{chartYears=Number(btn.dataset.years);document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',b===btn));chartSelected=false;renderChart();}));
+window.addEventListener('resize',()=>{if(chartRows.length)renderChart();});
+
 const DATA_URL='https://raw.githubusercontent.com/Hossein7935/sksi-credit-stress-index/main/data/latest.json';
 const CSV_URL='https://raw.githubusercontent.com/Hossein7935/sksi-credit-stress-index/main/data/sksi_weekly.csv';
 const $=id=>document.getElementById(id);
@@ -72,13 +132,13 @@ async function loadData(){
     const units={hy:'%',ig:'%',def:'Prozentpunkte',nfci:'Indexpunkte'};
     $('components').innerHTML=Object.entries(d.components||{}).map(([key,c])=>{
       const color=stateInfo(c.state);const val=Number(c.value);
-      return '<article class="component"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+(c.state||'unbekannt')+'</div><div class="zscore">z-Wert: '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div></article>';
+      const source=SOURCES[key];return '<a class="component component-link" href="'+(source?source.url:'#')+'" target="_blank" rel="noreferrer" aria-label="Quelle öffnen: '+(names[key]||c.name||key)+'"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+(c.state||'unbekannt')+'</div><div class="zscore">z-Wert: '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div><span class="source-link">'+(source?source.label:'Quelle öffnen ↗')+'</span></a>';
     }).join('');
     $('updated').textContent='Datenstand: '+(d.date?d.date.split('-').reverse().join('.'): 'unbekannt')+' · erfolgreich geladen';
   }catch(e){$('updated').textContent='Daten konnten nicht geladen werden.';$('loadError').textContent='Fehler: '+e.message+' · Bitte erneut versuchen.';}
   finally{$('refresh').disabled=false;}
 }
-$('refresh').addEventListener('click',loadData);loadData();
+$('refresh').addEventListener('click',loadData);loadData();loadChart();
 </script>
 </body>
 </html>
