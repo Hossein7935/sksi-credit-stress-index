@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>SKSI – Credit Stress Index</title>
+<meta name="description" content="Wöchentlicher Kreditstress-Index mit vier Kreditmarkt-Signalen und historischem Verlauf seit 1997.">
+<style>
+:root{color-scheme:dark;--bg:#080e19;--panel:#111b2b;--panel2:#0d1625;--line:#25344a;--text:#edf3fc;--muted:#9aabc2;--blue:#7cb8ff;--green:#4ade80;--yellow:#facc15;--orange:#fb923c;--red:#fb7185}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a3150 0,transparent 55%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1120px;margin:auto;padding:28px 20px 56px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#60a5fa,#2563eb);display:grid;place-items:center;font-weight:900;color:#071326;letter-spacing:-1px}.eyebrow{color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}.brand h1{font-size:22px;margin:0;letter-spacing:-.04em}.subtitle{color:var(--muted);margin:2px 0 0;font-size:13px}.actions{display:flex;gap:10px;align-items:center}.btn,.linkbtn{border:1px solid var(--line);background:#132035;color:var(--text);padding:9px 13px;border-radius:10px;font:inherit;font-size:13px;text-decoration:none;cursor:pointer}.btn:hover,.linkbtn:hover{border-color:var(--blue)}.statusline{color:var(--muted);font-size:12px;margin:0 0 14px}.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr);gap:16px}.panel{background:linear-gradient(145deg,rgba(20,32,51,.96),rgba(12,21,35,.98));border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 12px 40px #0002}.panel h2{font-size:15px;margin:0 0 14px;letter-spacing:-.01em}.scoreline{display:flex;align-items:flex-end;gap:10px;margin:8px 0 12px}.score{font-size:clamp(56px,9vw,82px);font-weight:800;letter-spacing:-.08em;line-height:1}.outof{color:var(--muted);font-size:17px;padding-bottom:9px}.regime{display:inline-flex;align-items:center;gap:8px;border-radius:99px;padding:6px 11px;font-size:12px;font-weight:800;letter-spacing:.02em;background:#183b2b;color:var(--green)}.dot{width:7px;height:7px;border-radius:50%;background:currentColor}.gauge{height:11px;border-radius:99px;background:linear-gradient(90deg,#34d399 0 48%,#facc15 48% 68%,#fb923c 68% 84%,#fb7185 84% 100%);margin:23px 0 7px;position:relative}.needle{position:absolute;top:-5px;width:3px;height:21px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px #0b1220;left:0;transform:translateX(-50%)}.ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.summary{color:#d5e0ee;margin:18px 0 0;max-width:60ch}.sidegrid{display:grid;gap:12px}.mini{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:14px}.mini .label{color:var(--muted);font-size:12px}.mini strong{display:block;font-size:20px;margin-top:4px}.mini small{color:var(--muted)}.section{margin-top:18px}.sectionhead{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}.sectionhead h2{margin:0;font-size:17px}.sectionhead p{margin:0;color:var(--muted);font-size:12px}.components{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.component{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}.component .cname{color:var(--muted);font-size:12px;min-height:36px}.component .value{font-size:27px;font-weight:750;letter-spacing:-.04em;margin:4px 0}.component .unit{font-size:12px;color:var(--muted);font-weight:500}.state{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}.zscore{font-size:12px;color:var(--muted);margin-top:7px}.chartbox{overflow:hidden}.chart{width:100%;display:block;border-radius:10px;background:#fff}.note{color:var(--muted);font-size:12px;margin:12px 0 0}.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:20px;color:var(--muted);font-size:12px}.footer a{color:var(--blue);text-decoration:none}.error{color:#fda4af}.hidden{display:none}@media(max-width:760px){main{padding:18px 12px 36px}.hero{grid-template-columns:1fr}.components{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:17px}.brand h1{font-size:19px}}@media(max-width:390px){.components{grid-template-columns:1fr 1fr}.component{padding:12px}.component .value{font-size:23px}}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+  <div class="brand"><div class="logo">SK</div><div><div class="eyebrow">Market monitor</div><h1>Credit Stress Index</h1><p class="subtitle">Synchronisierter Kreditstress-Index · USA</p></div></div>
+  <div class="actions"><a class="linkbtn" href="https://github.com/Hossein7935/sksi-credit-stress-index" target="_blank" rel="noreferrer">Quellcode ↗</a><button class="btn" id="refresh">↻ Aktualisieren</button></div>
+</header>
+<p class="statusline" id="updated">Lade aktuelle Daten …</p>
+<section class="hero">
+  <article class="panel">
+    <div class="eyebrow">Aktueller Wochenwert</div>
+    <div class="scoreline"><div class="score" id="score">—</div><div class="outof">/ 100</div></div>
+    <div><span class="regime" id="regime"><span class="dot"></span><span id="regimeText">Daten werden geladen</span></span></div>
+    <div class="gauge" aria-label="Kreditstress-Skala von 0 bis 100"><div class="needle" id="needle"></div></div>
+    <div class="ticks"><span>0 · ruhig</span><span>48 · erhöht</span><span>68 · Stress</span><span>84 · schwer</span><span>100</span></div>
+    <p class="summary" id="summary">Der aktuelle Stand wird geladen.</p>
+  </article>
+  <aside class="sidegrid">
+    <div class="mini"><div class="label">Quorum – alle vier Signale erhöht</div><strong id="quorum">—</strong><small id="quorumDetail">Gemeinsames Stresssignal</small></div>
+    <div class="mini"><div class="label">Letzte verfügbare Woche</div><strong id="date">—</strong><small>Datum der Daten, nicht der Seitenaufruf</small></div>
+    <div class="mini"><div class="label">Modell-Basis</div><strong>1997–2006</strong><small>Kalibrierung bleibt eingefroren</small></div>
+  </aside>
+</section>
+<section class="section">
+  <div class="sectionhead"><h2>Die vier Stress-Signale</h2><p>Marktwerte und Abstand zum Normalniveau</p></div>
+  <div class="components" id="components">
+    <article class="component"><div class="cname">High-Yield-OAS</div><div class="value">—</div><div class="state">Lädt …</div></article>
+    <article class="component"><div class="cname">Investment-Grade-OAS</div><div class="value">—</div><div class="state">Lädt …</div></article>
+    <article class="component"><div class="cname">Ausfallprämie</div><div class="value">—</div><div class="state">Lädt …</div></article>
+    <article class="component"><div class="cname">NFCI</div><div class="value">—</div><div class="state">Lädt …</div></article>
+  </div>
+</section>
+<section class="section panel chartbox">
+  <div class="sectionhead"><h2>Historischer Verlauf seit 1997</h2><p>Wöchentlicher SKSI-Wert</p></div>
+  <img class="chart" src="./docs/history.svg" alt="Historischer Verlauf des SKSI-Kreditstress-Index seit 1997" loading="lazy">
+  <p class="note">Die Historie wird aus den veröffentlichten Wochenwerten erstellt. Die Darstellung ist ein rückblickender Indikator und keine sichere Vorhersage.</p>
+</section>
+<footer class="footer"><span id="loadError" class="error"></span><span>Quelle: ICE BofA OAS, Moody’s Corporate Bond Yields und Chicago Fed NFCI via FRED.</span><span><a href="https://github.com/Hossein7935/sksi-credit-stress-index/blob/main/README.md" target="_blank" rel="noreferrer">Methodik & Grenzen ↗</a> · Keine Anlageberatung.</span></footer>
+</main>
+<script>
+const DATA_URL='https://raw.githubusercontent.com/Hossein7935/sksi-credit-stress-index/main/data/latest.json';
+const CSV_URL='https://raw.githubusercontent.com/Hossein7935/sksi-credit-stress-index/main/data/sksi_weekly.csv';
+const $=id=>document.getElementById(id);
+const fmt=(n,d=2)=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
+function regimeInfo(regime){return ({normal:{label:'RUHIG',color:'#4ade80',bg:'#183b2b'},watch:{label:'ERHÖHT',color:'#facc15',bg:'#463915'},stress:{label:'STRESS',color:'#fb923c',bg:'#482719'},severe:{label:'SCHWERER STRESS',color:'#fb7185',bg:'#4a1d2a'}})[regime]||{label:String(regime||'UNBEKANNT').toUpperCase(),color:'#9aabc2',bg:'#25344a'};}
+function stateInfo(state){const s=String(state||'normal').toLowerCase();if(s.includes('hoch')||s.includes('stress'))return '#fb923c';if(s.includes('niedrig'))return '#7cb8ff';return '#4ade80';}
+async function loadData(){
+  $('refresh').disabled=true;$('loadError').textContent='';$('updated').textContent='Daten werden abgerufen …';
+  try{
+    const res=await fetch(DATA_URL+'?t='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error('Datenquelle antwortet mit HTTP '+res.status);
+    const d=await res.json();
+    $('score').textContent=fmt(d.score,1);$('date').textContent=d.date?d.date.split('-').reverse().join('.'): '—';
+    const info=regimeInfo(d.regime);$('regime').style.color=info.color;$('regime').style.background=info.bg;$('regimeText').textContent=info.label;
+    $('needle').style.left=Math.max(0,Math.min(100,Number(d.score)||0))+'%';
+    $('summary').textContent=d.summary||'Kein Kurzbericht verfügbar.';
+    $('quorum').textContent=d.quorum?'JA · Warnsignal':'NEIN · kein Quorum';$('quorum').style.color=d.quorum?'#fb7185':'#4ade80';
+    $('quorumDetail').textContent=d.quorum?'Alle vier Komponenten sind gleichzeitig erhöht.':'Nicht alle vier Signale sind gleichzeitig erhöht.';
+    const names={hy:'High-Yield-OAS',ig:'Investment-Grade-OAS',def:'Ausfallprämie (Baa − Aaa)',nfci:'Chicago Fed NFCI'};
+    const units={hy:'%',ig:'%',def:'Prozentpunkte',nfci:'Indexpunkte'};
+    $('components').innerHTML=Object.entries(d.components||{}).map(([key,c])=>{
+      const color=stateInfo(c.state);const val=Number(c.value);
+      return '<article class="component"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+(c.state||'unbekannt')+'</div><div class="zscore">z-Wert: '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div></article>';
+    }).join('');
+    $('updated').textContent='Datenstand: '+(d.date?d.date.split('-').reverse().join('.'): 'unbekannt')+' · erfolgreich geladen';
+  }catch(e){$('updated').textContent='Daten konnten nicht geladen werden.';$('loadError').textContent='Fehler: '+e.message+' · Bitte erneut versuchen.';}
+  finally{$('refresh').disabled=false;}
+}
+$('refresh').addEventListener('click',loadData);loadData();
+</script>
+</body>
+</html>
