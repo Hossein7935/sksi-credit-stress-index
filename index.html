@@ -518,6 +518,31 @@ body.light .interactive-chart:hover,body.light .interactive-chart.is-exploring,b
 @media(max-width:760px){.interactive-chart:hover,.interactive-chart.is-exploring,.source-spark:hover,.source-spark.is-exploring{transform:none!important}}
 @media(prefers-reduced-motion:reduce){.interactive-chart,.source-spark{transition:none!important;will-change:auto}}
 
+
+/* Purposeful engagement: user-led exploration and meaningful feedback */
+.explore-path{display:grid;grid-template-columns:minmax(0,1.1fr) repeat(3,minmax(0,1fr));gap:10px;align-items:stretch;margin:14px 0 24px;padding:12px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(120deg,rgba(18,35,59,.68),rgba(8,17,31,.48));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.explore-intro{display:flex;flex-direction:column;justify-content:center;padding:8px 12px;gap:5px}
+.explore-kicker{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.explore-title{font-size:14px;line-height:1.35;font-weight:750;color:var(--text)}
+.explore-subtitle{font-size:11px;line-height:1.5;color:var(--muted)}
+.explore-action{position:relative;display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border:1px solid rgba(125,211,252,.14);border-radius:14px;background:rgba(91,143,205,.055);color:var(--text);cursor:pointer;min-width:0;transition:transform .22s ease,border-color .22s ease,background .22s ease,box-shadow .22s ease}
+.explore-action:hover,.explore-action:focus-visible{transform:translateY(-3px);outline:none;border-color:rgba(103,232,249,.52);background:rgba(56,189,248,.1);box-shadow:0 10px 28px rgba(0,0,0,.16),0 0 22px rgba(56,189,248,.07)}
+.explore-num{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:10px;background:linear-gradient(145deg,rgba(59,130,246,.24),rgba(34,211,238,.12));border:1px solid rgba(125,211,252,.22);font-size:11px;font-weight:850;color:#bdeeff}
+.explore-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.explore-copy strong{font-size:12px;line-height:1.35;font-weight:750}
+.explore-copy small{font-size:10px;line-height:1.4;color:var(--muted)}
+.explore-action[aria-current="step"]{border-color:rgba(103,232,249,.65);background:rgba(34,211,238,.1);box-shadow:inset 0 0 0 1px rgba(103,232,249,.08)}
+.sidegrid .mini .delta-value{display:flex;align-items:center;gap:7px;font-size:22px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.delta-value .delta-arrow{font-size:13px;color:var(--muted)}
+.delta-value.up{color:#fb923c}.delta-value.down{color:#4ade80}.delta-value.flat{color:var(--text)}
+.delta-value .delta-arrow{color:inherit}
+body.light .explore-path{background:linear-gradient(120deg,rgba(255,255,255,.92),rgba(235,244,255,.76))}
+body.light .explore-action{background:rgba(59,130,246,.035);border-color:rgba(37,99,235,.13)}
+body.light .explore-action:hover,body.light .explore-action:focus-visible{background:rgba(59,130,246,.07)}
+@media(max-width:900px){.explore-path{grid-template-columns:repeat(3,minmax(0,1fr))}.explore-intro{grid-column:1/-1;padding:4px 8px 8px}}
+@media(max-width:560px){.explore-path{grid-template-columns:1fr;padding:10px;gap:8px}.explore-intro{grid-column:auto}.explore-action{padding:11px}.explore-copy strong{font-size:13px}.explore-copy small{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.explore-action{transition:none}.explore-action:hover{transform:none}}
+
 </style>
 </head>
 <body>
@@ -535,6 +560,12 @@ body.light .interactive-chart:hover,body.light .interactive-chart.is-exploring,b
   <p id="introText">Der SKSI bündelt vier Signale aus dem US-Kreditmarkt zu einem wöchentlichen Gesamtbild. Verfolge, wie sich die Kreditbedingungen verändern – vom ruhigen Markt bis zu Phasen erhöhter Anspannung.</p>
   <div class="intro-tags"><span id="introTag1">Wöchentlich aktualisiert</span><span id="introTag2">Historie seit 1997</span><span id="introTag3">Vier Marktsignale</span></div><div class="scroll-cue" id="scrollCue"><span class="cue-line"></span><span id="scrollCueText">WEITER ENTDECKEN</span><span class="cue-arrow" aria-hidden="true">↓</span></div>
 </section>
+<nav class="explore-path" id="explorePath" aria-label="Analyse entdecken">
+ <div class="explore-intro"><span class="explore-kicker" id="exploreKicker">DEIN ANALYSEPFAD</span><strong class="explore-title" id="exploreTitle">Entdecke die Signale in deinem Tempo</strong><span class="explore-subtitle" id="exploreSubtitle">Wähle einen Einstieg – du behältst die Kontrolle.</span></div>
+ <button class="explore-action" type="button" data-explore="score" aria-current="step"><span class="explore-num">01</span><span class="explore-copy"><strong id="exploreOne">Aktuelle Lage</strong><small id="exploreOneSub">Was sagt der Wert?</small></span></button>
+ <button class="explore-action" type="button" data-explore="components"><span class="explore-num">02</span><span class="explore-copy"><strong id="exploreTwo">Vier Signale</strong><small id="exploreTwoSub">Was bewegt den Index?</small></span></button>
+ <button class="explore-action" type="button" data-explore="mainChart"><span class="explore-num">03</span><span class="explore-copy"><strong id="exploreThree">Historie erkunden</strong><small id="exploreThreeSub">Vergleiche frühere Phasen</small></span></button>
+</nav>
 <section class="hero">
   <article class="panel">
     <div class="eyebrow">Aktueller Wochenwert</div>
@@ -548,6 +579,7 @@ body.light .interactive-chart:hover,body.light .interactive-chart.is-exploring,b
     <div class="mini"><div class="label">Quorum – alle vier Signale erhöht</div><strong id="quorum">—</strong><small id="quorumDetail">Gemeinsames Stresssignal</small></div>
     <div class="mini"><div class="label">Letzte verfügbare Woche</div><strong id="date">—</strong><small>Datum der Daten, nicht der Seitenaufruf</small></div>
     <div class="mini"><div class="label">Modell-Basis</div><strong>1997–2006</strong><small>Kalibrierung bleibt eingefroren</small></div>
+<div class="mini"><div class="label" id="trendLabel">Veränderung zur Vorwoche</div><strong class="delta-value flat" id="weeklyDelta">—</strong><small id="trendHint">Vergleich mit dem vorherigen Wochenwert</small></div>
   </aside>
 </section>
 <section class="section">
