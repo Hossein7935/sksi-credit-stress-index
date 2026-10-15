@@ -26,7 +26,7 @@ body.light .interactive-chart{background:#fff}#languageSelect{max-width:130px;cu
 body.light .range-btn{background:#f8fafc;color:#53657d}
 body.light .range-btn.active,body.light .range-btn:hover{background:#eaf2ff;color:#1d4ed8}
 .theme-toggle{white-space:nowrap}
-.source-spark{display:block;width:100%;height:140px;overflow:hidden;background:transparent;border:1px solid var(--line);border-radius:8px;margin-top:10px;cursor:crosshair;opacity:1;transition:none}.source-spark:hover{opacity:1;filter:none}.source-spark svg{display:block;width:100%;height:100%;background:transparent}.source-spark circle{cursor:crosshair}.component:has(.source-spark:hover){z-index:2}
+.source-spark{position:relative;display:block;width:100%;height:140px;overflow:hidden;background:transparent;border:1px solid var(--line);border-radius:8px;margin-top:10px;cursor:crosshair;opacity:1;transition:none;touch-action:pan-y}.source-spark:hover{opacity:1;filter:none}.source-spark svg{display:block;width:100%;height:100%;background:transparent;overflow:hidden}.source-spark circle{cursor:crosshair}.source-hover-tip{position:absolute;z-index:5;top:6px;left:6px;max-width:calc(100% - 12px);padding:5px 7px;border:1px solid #64748b;border-radius:5px;background:rgba(10,18,31,.96);color:#f8fafc;font-size:11px;line-height:1.25;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.18);white-space:nowrap}.source-chart-tip{font-size:10px;color:var(--muted);margin-top:4px;min-height:12px}.component:has(.source-spark:hover){z-index:2}
 .source-hint{display:block;color:var(--blue);font-size:11px;margin-top:8px}
 .component-link{overflow:hidden}
 @media(max-width:760px){.source-spark{height:110px}}
@@ -200,20 +200,43 @@ async function loadSourceCharts(){
     const imported=document.importNode(svg,true);
     imported.removeAttribute('width');imported.removeAttribute('height');
     imported.setAttribute('preserveAspectRatio','xMidYMid meet');
+    const samples=[...imported.querySelectorAll('circle')].map(point=>{
+      const title=point.querySelector('title');
+      const label=title?title.textContent:'';
+      if(title)title.remove();
+      point.dataset.hoverLabel=label;
+      return point;
+    }).filter(point=>point.dataset.hoverLabel);
     box.replaceChildren(imported);
-    const tip=box.nextElementSibling;
-    if(tip&&tip.classList.contains('source-chart-tip')){
-      box.addEventListener('pointermove',event=>{
-       const target=event.target.closest('circle');
-       if(!target)return;
-       const title=target.querySelector('title');
-       if(title)tip.textContent=title.textContent;
-      });
-      box.addEventListener('pointerleave',()=>{tip.textContent='Maus über die Linie bewegen: Datum und Wert';});
-    }
+    const hoverTip=document.createElement('div');
+    hoverTip.className='source-hover-tip';hoverTip.hidden=true;box.appendChild(hoverTip);
+    const cross=document.createElementNS(NS,'line');
+    cross.setAttribute('y1','46');cross.setAttribute('y2','316');
+    cross.setAttribute('stroke','#e2e8f0');cross.setAttribute('stroke-width','1.5');
+    cross.setAttribute('stroke-dasharray','4 4');cross.setAttribute('pointer-events','none');cross.setAttribute('visibility','hidden');
+    const dot=document.createElementNS(NS,'circle');
+    dot.setAttribute('r','5');dot.setAttribute('fill','#ffffff');dot.setAttribute('stroke','#60a5fa');dot.setAttribute('stroke-width','3');
+    dot.setAttribute('pointer-events','none');dot.setAttribute('visibility','hidden');
+    imported.appendChild(cross);imported.appendChild(dot);
+    box.addEventListener('pointermove',event=>{
+      if(!samples.length)return;
+      const rect=imported.getBoundingClientRect();
+      const viewX=Math.max(78,Math.min(972,(event.clientX-rect.left)/rect.width*1000));
+      let nearest=samples[0],distance=Infinity;
+      for(const point of samples){const dx=Math.abs(Number(point.getAttribute('cx'))-viewX);if(dx<distance){distance=dx;nearest=point;}}
+      const px=Number(nearest.getAttribute('cx')),py=Number(nearest.getAttribute('cy'));
+      cross.setAttribute('x1',px);cross.setAttribute('x2',px);cross.setAttribute('visibility','visible');
+      dot.setAttribute('cx',px);dot.setAttribute('cy',py);dot.setAttribute('visibility','visible');
+      hoverTip.textContent=nearest.dataset.hoverLabel;hoverTip.hidden=false;
+      const boxRect=box.getBoundingClientRect(),localX=event.clientX-boxRect.left;
+      hoverTip.style.left=Math.max(4,Math.min(boxRect.width-hoverTip.offsetWidth-4,localX+10))+'px';
+      hoverTip.style.top=localX>boxRect.width*.68?'auto':'6px';
+      hoverTip.style.bottom=hoverTip.style.top==='auto'?'6px':'auto';
+    });
+    box.addEventListener('pointerleave',()=>{hoverTip.hidden=true;cross.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');});
    }catch(err){box.textContent='Chart konnte nicht geladen werden';}
   });
- }
+}
 async function loadData(){
   $('refresh').disabled=true;$('loadError').textContent='';$('updated').textContent=tr('loading');
   try{
