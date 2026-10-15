@@ -26,7 +26,7 @@ body.light .interactive-chart{background:#fff}#languageSelect{max-width:130px;cu
 body.light .range-btn{background:#f8fafc;color:#53657d}
 body.light .range-btn.active,body.light .range-btn:hover{background:#eaf2ff;color:#1d4ed8}
 .theme-toggle{white-space:nowrap}
-.source-spark{display:block;width:100%;height:140px;object-fit:contain;object-position:center;background:transparent;border:1px solid var(--line);border-radius:8px;margin-top:10px;cursor:crosshair;opacity:1;transition:opacity .12s ease}.source-spark:hover{opacity:1;filter:none}.component:has(.source-spark:hover){z-index:2}
+.source-spark{display:block;width:100%;height:140px;overflow:hidden;background:transparent;border:1px solid var(--line);border-radius:8px;margin-top:10px;cursor:crosshair;opacity:1;transition:none}.source-spark:hover{opacity:1;filter:none}.source-spark svg{display:block;width:100%;height:100%;background:transparent}.source-spark circle{cursor:crosshair}.component:has(.source-spark:hover){z-index:2}
 .source-hint{display:block;color:var(--blue);font-size:11px;margin-top:8px}
 .component-link{overflow:hidden}
 @media(max-width:760px){.source-spark{height:110px}}
@@ -187,6 +187,33 @@ const $=id=>document.getElementById(id);
 const fmt=(n,d=2)=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
 function regimeInfo(regime){return ({normal:{label:'RUHIG',color:'#4ade80',bg:'#183b2b'},watch:{label:'ERHÖHT',color:'#facc15',bg:'#463915'},stress:{label:'STRESS',color:'#fb923c',bg:'#482719'},severe:{label:'SCHWERER STRESS',color:'#fb7185',bg:'#4a1d2a'}})[regime]||{label:String(regime||'UNBEKANNT').toUpperCase(),color:'#9aabc2',bg:'#25344a'};}
 function stateInfo(state){const s=String(state||'normal').toLowerCase();if(s.includes('hoch')||s.includes('stress'))return '#fb923c';if(s.includes('niedrig'))return '#7cb8ff';return '#4ade80';}
+async function loadSourceCharts(){
+  document.querySelectorAll('.source-spark[data-chart]').forEach(async box=>{
+   const url=box.dataset.chart;
+   try{
+    const res=await fetch(url+'?t='+Date.now(),{cache:'no-store'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const markup=await res.text();
+    const doc=new DOMParser().parseFromString(markup,'image/svg+xml');
+    const svg=doc.documentElement;
+    if(svg.localName!=='svg'||doc.querySelector('parsererror'))throw new Error('Invalid SVG');
+    const imported=document.importNode(svg,true);
+    imported.removeAttribute('width');imported.removeAttribute('height');
+    imported.setAttribute('preserveAspectRatio','xMidYMid meet');
+    box.replaceChildren(imported);
+    const tip=box.nextElementSibling;
+    if(tip&&tip.classList.contains('source-chart-tip')){
+      box.addEventListener('pointermove',event=>{
+       const target=event.target.closest('circle');
+       if(!target)return;
+       const title=target.querySelector('title');
+       if(title)tip.textContent=title.textContent;
+      });
+      box.addEventListener('pointerleave',()=>{tip.textContent='Maus über die Linie bewegen: Datum und Wert';});
+    }
+   }catch(err){box.textContent='Chart konnte nicht geladen werden';}
+  });
+ }
 async function loadData(){
   $('refresh').disabled=true;$('loadError').textContent='';$('updated').textContent=tr('loading');
   try{
@@ -202,14 +229,14 @@ async function loadData(){
     const units={hy:'%',ig:'%',def:'Prozentpunkte',nfci:'Indexpunkte'};
     $('components').innerHTML=Object.entries(d.components||{}).map(([key,c])=>{
       const color=stateInfo(c.state);const val=Number(c.value);
-      const source=SOURCES[key];return '<div class="component"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+translatedState(c.state)+'</div><div class="zscore">'+tr('z')+' '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div>'+(source?'<img class="source-spark" loading="lazy" src="'+source.chart+'?t='+Date.now()+'" alt="Chart: '+(names[key]||c.name||key)+'" onerror="this.alt=\'Chart konnte nicht geladen werden\';this.style.display=\'none\'"><a class="source-link" href="'+source.url+'" target="_blank" rel="noreferrer">Quelle öffnen ↗</a>':'')+'</div>';
+      const source=SOURCES[key];return '<div class="component"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+translatedState(c.state)+'</div><div class="zscore">'+tr('z')+' '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div>'+(source?'<div class="source-spark" data-chart="'+source.chart+'" role="img" aria-label="Interaktiver Chart: '+(names[key]||c.name||key)+'"><span>Chart wird geladen …</span></div><div class="source-chart-tip">Maus über die Linie bewegen: Datum und Wert</div><a class="source-link" href="'+source.url+'" target="_blank" rel="noreferrer">Quelle öffnen ↗</a>':'')+'</div>';
     }).join('');
     $('updated').textContent=tr('updated')+(d.date?d.date.split('-').reverse().join('.'): '—')+tr('success');
   }catch(e){$('updated').textContent=tr('failed');$('loadError').textContent=tr('error')+e.message+tr('retry');}
   finally{$('refresh').disabled=false;}
 }
 applyLanguage(document.getElementById('languageSelect').value||'de');
-$('refresh').addEventListener('click',loadData);loadData().then(()=>applyLanguage(currentLang));loadChart();
+$('refresh').addEventListener('click',loadData);loadData().then(()=>applyLanguage(currentLang));loadSourceCharts();loadChart();
 </script>
 </body>
 </html>
