@@ -634,6 +634,21 @@ body.light .source-spark.is-expanded svg .mini-line{stroke:#0757b7!important;fil
 body.light .summary{color:#3d506a!important}
 @media(prefers-reduced-transparency:reduce){body.light .panel,body.light .mini,body.light .component,body.light .chartbox.panel,body.light .interactive-chart,body.light .source-spark:not(.is-expanded){backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(255,255,255,.96)!important}}
 
+
+#chartWrap.is-3d{z-index:1001!important;position:relative;transform-style:preserve-3d!important;perspective:1250px;background:radial-gradient(ellipse at 50% 8%,rgba(34,211,238,.15),transparent 52%),linear-gradient(150deg,rgba(7,18,36,.92),rgba(3,8,19,.86))!important;border-color:rgba(103,232,249,.8)!important;box-shadow:0 45px 90px rgba(0,0,0,.45),0 0 0 1px rgba(125,211,252,.18),0 0 65px rgba(14,165,233,.2)!important;animation:plot3DEnter .7s cubic-bezier(.16,1,.3,1) both}
+#chartWrap.is-3d #historyChart{overflow:visible!important;transform:perspective(1250px) rotateX(14deg) rotateY(-2deg) translateZ(22px) scale(1.015);transform-origin:50% 58%;filter:drop-shadow(0 16px 10px rgba(0,0,0,.22));transition:transform .45s cubic-bezier(.16,1,.3,1),filter .45s ease}
+#chartWrap.is-3d:before{opacity:1!important;background:radial-gradient(420px circle at var(--pointer-x,50%) var(--pointer-y,50%),rgba(103,232,249,.22),rgba(59,130,246,.08) 38%,transparent 72%)!important}
+#chartWrap.is-3d:after{opacity:.8!important;background:linear-gradient(115deg,transparent 18%,rgba(125,211,252,.04) 35%,rgba(186,230,253,.24) 49%,rgba(255,255,255,.1) 52%,transparent 72%)!important;background-size:260% 100%!important;animation:plot3DSheen 4.5s ease-in-out infinite}
+#chartWrap.is-3d #chartTip{transform:translateZ(70px);box-shadow:0 18px 45px rgba(0,0,0,.35),0 0 24px rgba(34,211,238,.18)!important}
+#chart3DButton{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(103,232,249,.32);border-radius:999px;padding:9px 13px;background:rgba(56,189,248,.08);color:var(--text);font:inherit;font-size:12px;font-weight:750;cursor:pointer;transition:transform .2s ease,background .2s ease,border-color .2s ease}
+#chart3DButton:hover,#chart3DButton[aria-pressed="true"]{transform:translateY(-2px);background:rgba(34,211,238,.16);border-color:rgba(103,232,249,.75);box-shadow:0 0 24px rgba(34,211,238,.13)}
+body.light #chartWrap.is-3d{background:radial-gradient(ellipse at 50% 8%,rgba(56,189,248,.2),transparent 52%),linear-gradient(150deg,rgba(255,255,255,.96),rgba(225,239,255,.92))!important;box-shadow:0 42px 85px rgba(30,64,110,.22),0 0 50px rgba(59,130,246,.15)!important}
+body.light #chartWrap.is-3d #historyChart{filter:drop-shadow(0 15px 9px rgba(40,70,110,.18))}
+@keyframes plot3DEnter{0%{transform:perspective(1200px) rotateX(0deg) scale(.985);filter:brightness(.8)}60%{filter:brightness(1.13)}100%{transform:perspective(1200px) rotateX(2deg) scale(1);filter:brightness(1)}}
+@keyframes plot3DSheen{0%,100%{background-position:150% 0}50%{background-position:-100% 0}}
+@media(max-width:760px){#chartWrap.is-3d #historyChart{transform:perspective(1000px) rotateX(8deg) translateZ(10px) scale(1.005)}}
+@media(prefers-reduced-motion:reduce){#chartWrap.is-3d{animation:none!important}#chartWrap.is-3d #historyChart{transition:none!important}#chartWrap.is-3d:after{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -683,7 +698,7 @@ body.light .summary{color:#3d506a!important}
   </div>
 </section>
 <section class="section panel chartbox" id="mainChart">
-  <div class="sectionhead"><div><h2>Kreditstress im Zeitverlauf</h2><p id="historyLead">Langfristige Perspektive statt Momentaufnahme.</p></div><div class="chart-tools" role="group" aria-label="Zeitraum wählen"><button class="range-btn" data-years="5">5 J.</button><button class="range-btn" data-years="10">10 J.</button><button class="range-btn active" data-years="0">Max.</button></div></div>
+  <div class="sectionhead"><div><h2>Kreditstress im Zeitverlauf</h2><p id="historyLead">Langfristige Perspektive statt Momentaufnahme.</p></div><div class="chart-tools" role="group" aria-label="Zeitraum wählen"><button id="chart3DButton" type="button" aria-pressed="false">◇ 3D-Ansicht</button><button class="range-btn" data-years="5">5 J.</button><button class="range-btn" data-years="10">10 J.</button><button class="range-btn active" data-years="0">Max.</button></div></div>
   <div class="interactive-chart" id="chartWrap" aria-label="Interaktiver Kreditstress-Chart">
     <svg id="historyChart" viewBox="0 0 1000 360" role="img" aria-label="Interaktiver Verlauf des SKSI-Index mit Jahresachse"><text x="500" y="175" fill="#9aabc2" text-anchor="middle" font-size="16">Historische Daten werden geladen …</text></svg>
     <div class="chart-tip" id="chartTip"></div>
@@ -733,7 +748,8 @@ function renderChart(){
  svg.appendChild(defs);
  svg.appendChild(svgEl('path',{d:area,fill:'url(#sksiAreaGrad)',opacity:1}));
  svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:'#3b82f6','stroke-width':8,'stroke-linejoin':'round','stroke-linecap':'round',opacity:light?'.14':'.22',filter:'url(#sksiLineGlow)'}));
- svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:light?'#1d64c8':'#60a5fa','stroke-width':2.6,'stroke-linejoin':'round','stroke-linecap':'round'}));
+ if(wrap.classList.contains('is-3d')){const depth=9,side=svgEl('g',{class:'plot-extrusion','aria-hidden':'true'});for(let layer=depth;layer>=1;layer--){const shifted=rows.map((r,i)=>(x(i)+layer*1.35)+','+(y(r.score)+layer*2.25)).join(' ');side.appendChild(svgEl('polyline',{points:shifted,fill:'none',stroke:light?(layer>5?'#b6c9e5':'#6092d5'):(layer>5?'#172d4b':'#2470b8'),'stroke-width':layer===1?4.8:4.2,'stroke-linejoin':'round','stroke-linecap':'round',opacity:layer>5?'.72':'.92'}));}svg.appendChild(side);}
+  svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:light?'#1d64c8':'#60a5fa','stroke-width':2.6,'stroke-linejoin':'round','stroke-linecap':'round'}));
  const lastPoint=rows[rows.length-1];
  svg.appendChild(svgEl('circle',{cx:x(rows.length-1),cy:y(lastPoint.score),r:10,fill:'#60a5fa',opacity:'.13'}));
  svg.appendChild(svgEl('circle',{cx:x(rows.length-1),cy:y(lastPoint.score),r:4.2,fill:light?'#1d64c8':'#dbeafe',stroke:'#60a5fa','stroke-width':2}));
@@ -826,6 +842,11 @@ document.getElementById('themeToggle').addEventListener('click',()=>setTheme(doc
 document.getElementById('languageSelect').addEventListener('change',e=>applyLanguage(e.target.value));
 try{document.getElementById('languageSelect').value=localStorage.getItem(LANG_KEY)||'de'}catch(e){}
 document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click',()=>{chartYears=Number(btn.dataset.years);document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',b===btn));chartSelected=false;renderChart();}));
+ const chartWrap=document.getElementById('chartWrap'),chart3DButton=document.getElementById('chart3DButton');
+ function setChart3D(enabled){if(!chartWrap)return;chartWrap.classList.toggle('is-3d',enabled);if(chart3DButton){chart3DButton.setAttribute('aria-pressed',enabled?'true':'false');chart3DButton.textContent=enabled?'◇ 3D-Ansicht aktiv':'◇ 3D-Ansicht';}renderChart();}
+ if(chart3DButton)chart3DButton.addEventListener('click',event=>{event.stopPropagation();setChart3D(!chartWrap.classList.contains('is-3d'));});
+ if(chartWrap)chartWrap.addEventListener('click',event=>{if(event.target.closest('.chart-tip'))return;setChart3D(!chartWrap.classList.contains('is-3d'));});
+
  document.querySelectorAll('[data-explore]').forEach(btn=>btn.addEventListener('click',()=>{
   const id=btn.dataset.explore,target=id==='score'?document.getElementById('score'):document.getElementById(id);
   if(target)target.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:id==='score'?'center':'start'});
