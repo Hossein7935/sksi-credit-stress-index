@@ -614,11 +614,11 @@ document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click
    surface.style.setProperty('--pointer-x',((event.clientX-rect.left)/rect.width*100)+'%');
    surface.style.setProperty('--pointer-y',((event.clientY-rect.top)/rect.height*100)+'%');
    const nx=((event.clientX-rect.left)/rect.width-.5)*2,ny=((event.clientY-rect.top)/rect.height-.5)*2;
-   surface.style.setProperty('--tilt-x',(-ny*1.15)+'deg');surface.style.setProperty('--tilt-y',(nx*1.15)+'deg');
+   surface.style.setProperty('--tilt-x',(-ny*2.2)+'deg');surface.style.setProperty('--tilt-y',(nx*2.2)+'deg');surface.classList.add('is-exploring');
   });
   surface.addEventListener('pointerleave',()=>{
    surface.style.setProperty('--pointer-x','50%');surface.style.setProperty('--pointer-y','50%');
-   surface.style.setProperty('--tilt-x','.65deg');surface.style.setProperty('--tilt-y','-.45deg');
+   surface.style.setProperty('--tilt-x','0deg');surface.style.setProperty('--tilt-y','0deg');surface.classList.remove('is-exploring');
   });
  });
  window.addEventListener('resize',()=>{if(chartRows.length)renderChart();});
@@ -665,7 +665,7 @@ async function loadSourceCharts(){
       box.style.setProperty('--pointer-x',((event.clientX-rect.left)/rect.width*100)+'%');
       box.style.setProperty('--pointer-y',((event.clientY-rect.top)/rect.height*100)+'%');
       const nx=((event.clientX-rect.left)/rect.width-.5)*2,ny=((event.clientY-rect.top)/rect.height-.5)*2;
-      box.style.setProperty('--tilt-x',(-ny*1.15)+'deg');box.style.setProperty('--tilt-y',(nx*1.15)+'deg');
+      box.style.setProperty('--tilt-x',(-ny*3)+'deg');box.style.setProperty('--tilt-y',(nx*3)+'deg');box.classList.add('is-exploring');
       if(!samples.length)return;
       const chartRect=imported.getBoundingClientRect();
       const viewX=Math.max(78,Math.min(972,(event.clientX-chartRect.left)/chartRect.width*1000));
@@ -680,7 +680,7 @@ async function loadSourceCharts(){
       hoverTip.style.top=localX>boxRect.width*.68?'auto':'6px';
       hoverTip.style.bottom=hoverTip.style.top==='auto'?'6px':'auto';
     });
-    box.addEventListener('pointerleave',()=>{hoverTip.hidden=true;cross.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');box.style.setProperty('--pointer-x','50%');box.style.setProperty('--pointer-y','50%');box.style.setProperty('--tilt-x','.65deg');box.style.setProperty('--tilt-y','-.45deg');});
+    box.addEventListener('pointerleave',()=>{hoverTip.hidden=true;cross.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');box.style.setProperty('--pointer-x','50%');box.style.setProperty('--pointer-y','50%');box.style.setProperty('--tilt-x','0deg');box.style.setProperty('--tilt-y','0deg');box.classList.remove('is-exploring');});
    }catch(err){box.textContent='Chart konnte nicht geladen werden';}
   });
 }
