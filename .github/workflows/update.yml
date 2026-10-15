@@ -1,6 +1,8 @@
 name: Update SKSI
 
 on:
+  push:
+    branches: [main]
   schedule:
     # Weekdays after the US cash close. NFCI is released on Wednesday morning ET.
     - cron: "15 21 * * 1-5"
@@ -19,11 +21,13 @@ jobs:
           python-version: "3.12"
       - name: Refresh the index from FRED
         run: python -m sksi.update
-      - name: Commit when the reading changed
+      - name: Download source charts from FRED
+        run: python -m sksi.download_source_charts
+      - name: Commit updated data and source charts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/sksi_weekly.csv data/latest.json docs/history.svg
+          git add data/sksi_weekly.csv data/latest.json docs/history.svg charts/*.png docs/charts/*.png
           if git diff --cached --quiet; then
             echo "No change"
           else
