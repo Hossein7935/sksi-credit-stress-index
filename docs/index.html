@@ -675,37 +675,20 @@ body.light #chartWrap.is-3d #chartTip{background:rgba(249,252,255,.94)!important
 #chartWrap.is-3d:before,#chartWrap.is-3d:after{display:none!important}
 
 
-/* Final layout correction: WebGL gets the full chart footprint, never a shrunken plot. */
-#chartWrap.is-3d{
-  min-height:390px!important;height:auto!important;overflow:hidden!important;
-  transform:none!important;perspective:none!important;transform-style:flat!important;
-  padding:0!important;box-sizing:border-box!important;
-}
-#chartWrap.is-3d #sksiWebGL{
-  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
-  min-height:390px!important;display:block;z-index:0!important;pointer-events:none!important;
-}
-#chartWrap.is-3d #historyChart{
-  display:block!important;position:relative!important;z-index:1!important;
-  width:100%!important;height:390px!important;min-height:390px!important;max-height:none!important;
-  transform:none!important;filter:none!important;overflow:visible!important;
-}
-#chartWrap.is-3d #historyChart>rect:first-child{opacity:0!important}
-#chartWrap.is-3d #historyChart>path:not(#crosshair path),
-#chartWrap.is-3d #historyChart>polyline:not(#crosshair polyline),
-#chartWrap.is-3d #historyChart>circle:not(#crosshair circle){opacity:0!important}
-#chartWrap.is-3d #historyChart #crosshair,
-#chartWrap.is-3d #historyChart #crosshair line,
-#chartWrap.is-3d #historyChart #crosshair circle{opacity:1!important}
-#chartWrap.is-3d #historyChart text{fill:var(--text)!important;stroke:none!important}
-#chartWrap.is-3d:before,#chartWrap.is-3d:after{display:none!important}
-#chartWrap.is-3d #chartTip{transform:none!important;z-index:5!important}
-body.light #chartWrap.is-3d{background:#f7fbff!important;border-color:rgba(59,130,246,.25)!important}
-@media(max-width:600px){
- #chartWrap.is-3d,#chartWrap.is-3d #sksiWebGL{min-height:340px!important}
- #chartWrap.is-3d #historyChart{height:340px!important;min-height:340px!important}
-}
 
+/* NEBULA 3D stage: stable cyan palette, large immersive canvas, no shrinking transforms. */
+#chartWrap.is-3d{height:420px!important;min-height:420px!important;overflow:hidden!important;background:#06101f!important;border:1px solid rgba(34,211,238,.52)!important;box-shadow:inset 0 0 60px rgba(0,195,255,.08),0 0 32px rgba(0,195,255,.1)!important}
+#chartWrap.is-3d #sksiWebGL{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:100%!important;z-index:0!important;display:block!important;pointer-events:none!important;touch-action:pan-y!important}
+#chartWrap.is-3d #historyChart{display:block!important;position:relative!important;z-index:1!important;width:100%!important;height:420px!important;min-height:420px!important;max-height:none!important;transform:none!important;filter:none!important;background:transparent!important}
+#chartWrap.is-3d #historyChart>rect:first-child{opacity:0!important}
+#chartWrap.is-3d #historyChart>path:not(#crosshair path),#chartWrap.is-3d #historyChart>polyline:not(#crosshair polyline),#chartWrap.is-3d #historyChart>circle:not(#crosshair circle){opacity:0!important}
+#chartWrap.is-3d #historyChart #crosshair,#chartWrap.is-3d #historyChart #crosshair line,#chartWrap.is-3d #historyChart #crosshair circle{opacity:1!important}
+#chartWrap.is-3d #historyChart text{fill:#b7d8ed!important;stroke:none!important}
+#chartWrap.is-3d:before,#chartWrap.is-3d:after{display:none!important}
+#chartWrap.is-3d #chartTip{transform:none!important;z-index:5!important;background:rgba(3,18,34,.94)!important;color:#dffbff!important;border-color:rgba(34,211,238,.65)!important}
+body.light #chartWrap.is-3d{background:#06101f!important;border-color:rgba(34,211,238,.52)!important}
+body.light #chartWrap.is-3d #historyChart text{fill:#b7d8ed!important}
+@media(max-width:600px){#chartWrap.is-3d{height:380px!important;min-height:380px!important}#chartWrap.is-3d #historyChart{height:380px!important;min-height:380px!important}}
 </style>
 </head>
 <body>
@@ -778,7 +761,7 @@ let chartRows=[],chartYears=0,chartSelected=null;
 const NS='http://www.w3.org/2000/svg';
 function svgEl(tag,attrs={},txt=''){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;return e;}
 /* Actual Three.js WebGL 3D scene for the SKSI history chart. */
-/* Babylon.js game-engine renderer: true WebGL geometry, glow, animated scan and camera orbit. */
+/* SKSI NEBULA: fixed-color Babylon.js real-time 3D scene. */
 let sksi3dScene=null;
 function sksi3dDraw(rows){
  const wrap=$('chartWrap'),enabled=wrap.classList.contains('is-3d');
@@ -786,42 +769,56 @@ function sksi3dDraw(rows){
  if(!window.BABYLON){$('loadError').textContent='Die 3D-Engine konnte nicht geladen werden.';return;}
  let q=sksi3dScene;
  if(!q){
-  const canvas=document.createElement('canvas');canvas.id='sksiWebGL';canvas.setAttribute('aria-label','Interaktive 3D-Darstellung des SKSI');wrap.insertBefore(canvas,wrap.firstChild);
-  const engine=new BABYLON.Engine(canvas,true,{antialias:true,stencil:true,preserveDrawingBuffer:false});
-  const scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(0.015,0.035,0.075,1);
-  const camera=new BABYLON.ArcRotateCamera('sksiCamera',-Math.PI/2,1.12,12,new BABYLON.Vector3(0,0,0),scene);
-  camera.lowerRadiusLimit=7;camera.upperRadiusLimit=14;camera.radius=9.3;camera.wheelPrecision=55;camera.panningSensibility=0;camera.attachControl(canvas,true);
-  const hemi=new BABYLON.HemisphericLight('sksiAmbient',new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.85;
-  const point=new BABYLON.PointLight('sksiCyanLight',new BABYLON.Vector3(-3,5,5),scene);point.diffuse=new BABYLON.Color3(.15,.8,1);point.intensity=2.1;
-  const glow=new BABYLON.GlowLayer('sksiGlow',scene,{blurKernelSize:48});glow.intensity=.65;
-  q=sksi3dScene={canvas:canvas,engine:engine,scene:scene,camera:camera,glow:glow,root:null,rows:[],scan:null,light:false};
-  engine.runRenderLoop(()=>{if(sksi3dScene&&sksi3dScene.scene.activeCamera&&sksi3dScene.canvas.style.display!=='none'){if(sksi3dScene.scan)sksi3dScene.scan.position.x=Math.sin(performance.now()*.00045)*4.15;sksi3dScene.scene.render();}});
+  const canvas=document.createElement('canvas');canvas.id='sksiWebGL';canvas.setAttribute('aria-label','SKSI Nebula – interaktive 3D-Zeitreihe');wrap.insertBefore(canvas,wrap.firstChild);
+  const engine=new BABYLON.Engine(canvas,true,{antialias:true,stencil:true,preserveDrawingBuffer:false,adaptToDeviceRatio:true});
+  const scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(.008,.018,.042,1);scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.018;scene.fogColor=new BABYLON.Color3(.008,.018,.042);
+  const camera=new BABYLON.ArcRotateCamera('nebulaCamera',-Math.PI/2,1.06,9.3,new BABYLON.Vector3(0,0,0),scene);
+  camera.lowerRadiusLimit=7.4;camera.upperRadiusLimit=13;camera.lowerBetaLimit=.68;camera.upperBetaLimit=1.42;camera.wheelPrecision=45;camera.panningSensibility=0;camera.inertia=.82;
+  const hemi=new BABYLON.HemisphericLight('nebulaAmbient',new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.72;
+  const lamp=new BABYLON.PointLight('nebulaKey',new BABYLON.Vector3(-3,4,5),scene);lamp.diffuse=new BABYLON.Color3(.12,.86,1);lamp.specular=new BABYLON.Color3(.3,.9,1);lamp.intensity=2.6;
+  const rim=new BABYLON.PointLight('nebulaRim',new BABYLON.Vector3(4,2,-3),scene);rim.diffuse=new BABYLON.Color3(.22,.2,1);rim.intensity=1.5;
+  const glow=new BABYLON.GlowLayer('nebulaBloom',scene,{blurKernelSize:64});glow.intensity=.78;
+  q=sksi3dScene={canvas,engine,scene,camera,glow,root:null,rows:[],scan:null,beacon:null,light:false};
+  engine.runRenderLoop(()=>{if(!sksi3dScene||sksi3dScene.canvas.style.display==='none')return;const t=performance.now()*.001;if(sksi3dScene.scan)sksi3dScene.scan.position.x=Math.sin(t*.42)*4.02;if(sksi3dScene.beacon){const p=1+Math.sin(t*2.4)*.16;sksi3dScene.beacon.scaling.set(p,p,p);}sksi3dScene.scene.render();});
   window.addEventListener('resize',()=>{if(sksi3dScene)sksi3dScene.engine.resize();});
  }
- q.canvas.style.display='block';q.rows=rows;q.light=document.body.classList.contains('light');
- q.scene.clearColor=q.light?new BABYLON.Color4(.88,.93,.99,1):new BABYLON.Color4(.012,.025,.055,1);
- q.glow.intensity=q.light?.36:.8;
+ q.canvas.style.display='block';q.rows=rows;
+ /* Deliberately fixed palette: the 3D hologram never changes color in light/dark mode. */
+ q.scene.clearColor=new BABYLON.Color4(.008,.018,.042,1);q.scene.fogColor=new BABYLON.Color3(.008,.018,.042);q.glow.intensity=.78;
  if(q.root)q.root.dispose(false,true);
- q.root=new BABYLON.TransformNode('sksiDataScene',q.scene);
- const add=(mesh)=>{mesh.parent=q.root;return mesh;};
- const mat=(name,color,emissive,alpha=1)=>{const m=new BABYLON.StandardMaterial(name,q.scene);m.diffuseColor=BABYLON.Color3.FromHexString(color);m.emissiveColor=BABYLON.Color3.FromHexString(emissive);m.alpha=alpha;m.specularColor=new BABYLON.Color3(.6,.9,1);m.specularPower=96;return m;};
- const gridMat=mat('sksiGrid',q.light?'#5f85b5':'#145678',q.light?'#284a78':'#0a4e70',q.light?.42:.6);
- for(let x=-4.2;x<=4.201;x+=.42)add(BABYLON.MeshBuilder.CreateLines('floorGridX',{points:[new BABYLON.Vector3(x,-1.75,-2.4),new BABYLON.Vector3(x,-1.75,2.4)],updatable:false},q.scene)).material=gridMat;
- for(let z=-2.4;z<=2.401;z+=.4)add(BABYLON.MeshBuilder.CreateLines('floorGridZ',{points:[new BABYLON.Vector3(-4.2,-1.75,z),new BABYLON.Vector3(4.2,-1.75,z)],updatable:false},q.scene)).material=gridMat;
- [{v:48,c:'#facc15'},{v:68,c:'#fb923c'},{v:84,c:'#fb7185'}].forEach(t=>{const y=-1.65+t.v/100*3.15,m=mat('riskBand'+t.v,t.c,t.c,.85);add(BABYLON.MeshBuilder.CreateLines('riskBand',{points:[new BABYLON.Vector3(-4.2,y,0),new BABYLON.Vector3(4.2,y,0)]},q.scene)).material=m;});
- const pts=rows.map((r,i)=>new BABYLON.Vector3(-4+8*i/(rows.length-1),-1.65+Math.max(0,Math.min(100,r.score))/100*3.15,Math.sin(i/(rows.length-1)*Math.PI*2)*.24));
- const areaPts=[...pts,new BABYLON.Vector3(4,-1.72,0),new BABYLON.Vector3(-4,-1.72,0)];
- const area=BABYLON.MeshBuilder.CreateRibbon('sksiVolume',{pathArray:[pts,[...pts].map(p=>new BABYLON.Vector3(p.x,-1.72,p.z))],sideOrientation:BABYLON.Mesh.DOUBLESIDE},q.scene);add(area);
- const areaMat=mat('sksiVolumeGlass',q.light?'#76a9ff':'#08aeea',q.light?'#376dd4':'#00bde8',.14);area.material=areaMat;area.isPickable=false;
- const glowMat=mat('sksiCurveGlow',q.light?'#65a1ff':'#04bff3',q.light?'#377cff':'#00d9ff',.32);
- add(BABYLON.MeshBuilder.CreateTube('sksiOuterTube',{path:pts,radius:.085,tessellation:12,cap:BABYLON.Mesh.CAP_ALL},q.scene)).material=glowMat;
- const lineMat=mat('sksiCurveCore',q.light?'#174fc2':'#9bf6ff',q.light?'#1e5de0':'#36dfff',1);
- add(BABYLON.MeshBuilder.CreateTube('sksiCurveCore',{path:pts,radius:.027,tessellation:10,cap:BABYLON.Mesh.CAP_ALL},q.scene)).material=lineMat;
- const pointMat=mat('sksiDataPoints',q.light?'#174fc2':'#c6fbff',q.light?'#337bff':'#35eaff',1);
- for(let i=0;i<pts.length;i+=Math.max(1,Math.floor(pts.length/65))){const dot=BABYLON.MeshBuilder.CreateSphere('sksiPoint',{diameter:.055,segments:8},q.scene);dot.position.copyFrom(pts[i]);dot.material=pointMat;add(dot);}
- const last=pts[pts.length-1],end=add(BABYLON.MeshBuilder.CreateSphere('sksiLatestPoint',{diameter:.2,segments:24},q.scene));end.position.copyFrom(last);end.material=mat('sksiLatestMaterial','#b9fbff','#00dfff',1);
- const scanMat=mat('sksiScanMaterial',q.light?'#397bdb':'#00dfff',q.light?'#397bdb':'#00dfff',.3);
- q.scan=add(BABYLON.MeshBuilder.CreateBox('sksiScanBeam',{width:.012,height:3.7,depth:.012},q.scene));q.scan.position.y=.05;q.scan.material=scanMat;q.scan.isPickable=false;
+ q.root=new BABYLON.TransformNode('nebulaDataLayer',q.scene);
+ const add=mesh=>{mesh.parent=q.root;return mesh;};
+ const material=(name,color,emissive,alpha=1)=>{const m=new BABYLON.StandardMaterial(name,q.scene);m.diffuseColor=BABYLON.Color3.FromHexString(color);m.emissiveColor=BABYLON.Color3.FromHexString(emissive);m.alpha=alpha;m.specularColor=new BABYLON.Color3(.55,.92,1);m.specularPower=128;m.backFaceCulling=false;return m;};
+ const cyan=material('nebulaCyan','#22d3ee','#00d9ff',.72);
+ const grid=material('nebulaGrid','#0d4966','#075b7b',.48);
+ const baseY=-1.72;
+ /* Perspective floor grid, with stronger distance rails to establish scale and depth. */
+ for(let x=-4.2;x<=4.201;x+=.42)add(BABYLON.MeshBuilder.CreateLines('floorLongitudinal',{points:[new BABYLON.Vector3(x,baseY,-2.7),new BABYLON.Vector3(x,baseY,2.7)]},q.scene)).material=grid;
+ for(let z=-2.7;z<=2.701;z+=.36)add(BABYLON.MeshBuilder.CreateLines('floorCrossGrid',{points:[new BABYLON.Vector3(-4.2,baseY,z),new BABYLON.Vector3(4.2,baseY,z)]},q.scene)).material=grid;
+ for(const z of [-2.7,2.7])add(BABYLON.MeshBuilder.CreateLines('depthRail',{points:[new BABYLON.Vector3(-4.2,baseY,z),new BABYLON.Vector3(4.2,baseY,z)]},q.scene)).material=cyan;
+ [{v:48,c:'#facc15'},{v:68,c:'#fb923c'},{v:84,c:'#fb7185'}].forEach(t=>{const y=-1.65+t.v/100*3.15,m=material('riskThreshold'+t.v,t.c,t.c,.8);add(BABYLON.MeshBuilder.CreateLines('riskThreshold',{points:[new BABYLON.Vector3(-4.2,y,0),new BABYLON.Vector3(4.2,y,0)]},q.scene)).material=m;});
+ const pts=rows.map((r,i)=>new BABYLON.Vector3(-4+8*i/(rows.length-1),-1.65+Math.max(0,Math.min(100,r.score))/100*3.15,Math.sin(i/(rows.length-1)*Math.PI*2)*.32));
+ /* Real translucent ribbon beneath the curve, with a raised back edge. */
+ const floorPts=pts.map(p=>new BABYLON.Vector3(p.x,baseY+.025,p.z));
+ const ribbon=BABYLON.MeshBuilder.CreateRibbon('nebulaGlassSurface',{pathArray:[pts,floorPts],sideOrientation:BABYLON.Mesh.DOUBLESIDE,updatable:false},q.scene);add(ribbon);
+ ribbon.material=material('nebulaGlassMaterial','#087da5','#00cfff',.12);ribbon.isPickable=false;
+ const lowerPts=pts.map(p=>new BABYLON.Vector3(p.x,baseY+.025,p.z));
+ const sidePath=pts.concat([...lowerPts].reverse());
+ const side=BABYLON.MeshBuilder.CreateRibbon('nebulaVolumeWall',{pathArray:[pts,lowerPts],sideOrientation:BABYLON.Mesh.DOUBLESIDE},q.scene);add(side);side.material=material('nebulaVolumeEdge','#0b678d','#007da8',.18);side.isPickable=false;
+ /* Score columns make the data's vertical magnitude readable in 3D. */
+ const stride=Math.max(1,Math.floor(rows.length/58));
+ const columnMat=material('nebulaColumnMaterial','#0d7196','#00bde9',.5);
+ for(let i=0;i<pts.length;i+=stride){const p=pts[i];const col=BABYLON.MeshBuilder.CreateLines('scoreColumn',{points:[new BABYLON.Vector3(p.x,baseY,p.z),new BABYLON.Vector3(p.x,p.y,p.z)]},q.scene);add(col).material=columnMat;}
+ /* A wide atmospheric outer tube and a crisp fixed-cyan core. */
+ add(BABYLON.MeshBuilder.CreateTube('nebulaOuterTrace',{path:pts,radius:.095,tessellation:14,cap:BABYLON.Mesh.CAP_ALL},q.scene)).material=material('nebulaOuterMaterial','#00a6ce','#00cfff',.28);
+ add(BABYLON.MeshBuilder.CreateTube('nebulaCoreTrace',{path:pts,radius:.031,tessellation:12,cap:BABYLON.Mesh.CAP_ALL},q.scene)).material=material('nebulaCoreMaterial','#9af7ff','#26e8ff',1);
+ const pointMat=material('nebulaNodeMaterial','#9af7ff','#21e6ff',1);
+ for(let i=0;i<pts.length;i+=stride){const node=BABYLON.MeshBuilder.CreateSphere('historyNode',{diameter:.065,segments:10},q.scene);node.position.copyFrom(pts[i]);node.material=pointMat;add(node);}
+ const last=pts[pts.length-1];
+ const beacon=add(BABYLON.MeshBuilder.CreateSphere('liveStressBeacon',{diameter:.24,segments:28},q.scene));beacon.position.copyFrom(last);beacon.material=material('liveBeaconMaterial','#d5fdff','#00eaff',1);q.beacon=beacon;
+ const halo=add(BABYLON.MeshBuilder.CreateSphere('liveBeaconHalo',{diameter:.44,segments:20},q.scene));halo.position.copyFrom(last);halo.material=material('liveBeaconHaloMaterial','#00cfff','#00dfff',.14);halo.isPickable=false;
+ const scanMat=material('nebulaScanMaterial','#40f4ff','#00eaff',.32);
+ q.scan=add(BABYLON.MeshBuilder.CreateBox('movingScanPlane',{width:.018,height:3.65,depth:5.1},q.scene));q.scan.position.set(-4,.05,0);q.scan.material=scanMat;q.scan.isPickable=false;
  q.engine.resize();
 }
 function renderChart(){
