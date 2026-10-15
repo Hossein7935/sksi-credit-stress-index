@@ -16,6 +16,14 @@ CHARTS = {
     "nfci": ("Chicago Fed National Financial Conditions Index", "NFCI", "#059669"),
 }
 
+# Official US recession periods according to NBER, shown with the same
+# peak-to-trough date convention used for recession shading on FRED charts.
+RECESSIONS = [
+    ("2001-03-01", "2001-11-01", "2001 recession"),
+    ("2007-12-01", "2009-06-01", "Great Recession"),
+    ("2020-02-01", "2020-04-01", "COVID-19 recession"),
+]
+
 
 def svg_chart(title: str, label: str, color: str,
               rows: list[tuple[date, float]]) -> str:
@@ -42,6 +50,18 @@ def svg_chart(title: str, label: str, color: str,
         '<rect width="100%" height="100%" rx="12" fill="#ffffff"/>',
         f'<text x="{left}" y="25" font-family="Arial,sans-serif" font-size="17" font-weight="600" fill="#182538">{html.escape(title)}</text>',
     ]
+    # Shade each US recession that overlaps this chart's data range.
+    for recession_start, recession_end, recession_label in RECESSIONS:
+        rec_start = date.fromisoformat(recession_start)
+        rec_end = date.fromisoformat(recession_end)
+        visible_start, visible_end = max(start, rec_start), min(end, rec_end)
+        if visible_start <= visible_end:
+            x1, x2 = x(visible_start), x(visible_end)
+            parts.append(
+                f'<rect x="{x1:.2f}" y="{top}" width="{max(1, x2-x1):.2f}" '
+                f'height="{plot_h}" fill="#ef4444" fill-opacity="0.16">'
+                f'<title>{html.escape(recession_label)}: {visible_start:%b %Y} – {visible_end:%b %Y}</title></rect>'
+            )
     for i in range(5):
         value = low + (high - low) * i / 4
         yy = y(value)
@@ -59,8 +79,18 @@ def svg_chart(title: str, label: str, color: str,
         parts.append(f'<text x="{xx:.2f}" y="{height-16}" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#53657a">{year}</text>')
     points = " ".join(f"{x(dt):.2f},{y(value):.2f}" for dt, value in rows)
     parts.append(f'<polyline fill="none" stroke="{color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="{points}"/>')
-    parts.append(f'<line x1="{left}" y1="{height-17}" x2="{left+20}" y2="{height-17}" stroke="{color}" stroke-width="3"/>')
+    # Invisible but hoverable data points show the exact date and value.
+    for dt, value in rows:
+        parts.append(
+            f'<circle cx="{x(dt):.2f}" cy="{y(value):.2f}" r="5" '
+            f'fill="{color}" fill-opacity="0.001" stroke="none" pointer-events="all">'
+            f'<title>{dt:%d %b %Y}: {value:.4f}</title></circle>'
+        )
+    legend_y = height - 17
+    parts.append(f'<line x1="{left}" y1="{legend_y}" x2="{left+20}" y2="{legend_y}" stroke="{color}" stroke-width="3"/>')
     parts.append(f'<text x="{left+27}" y="{height-13}" font-family="Arial,sans-serif" font-size="12" fill="#53657a">{html.escape(label)}</text>')
+    parts.append(f'<rect x="{left+260}" y="{legend_y-5}" width="18" height="10" fill="#ef4444" fill-opacity="0.25"/>')
+    parts.append(f'<text x="{left+284}" y="{height-13}" font-family="Arial,sans-serif" font-size="12" fill="#53657a">US recession</text>')
     parts.append('</svg>')
     return "\n".join(parts)
 
