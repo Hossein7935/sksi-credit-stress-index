@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<title>SKSI – Credit Stress Index</title>
-<meta name="description" content="Wöchentlicher Kreditstress-Index mit vier Kreditmarkt-Signalen und historischem Verlauf seit 1997.">
+<title>SKSI — Credit Stress Intelligence | US Credit Markets</title>
+<meta name="description" content="Der SKSI bündelt vier Signale des US-Kreditmarkts zu einem wöchentlichen Kreditstress-Index mit interaktivem Verlauf seit 1997.">
 <style>
 :root{color-scheme:dark;--bg:#080e19;--panel:#111b2b;--panel2:#0d1625;--line:#25344a;--text:#edf3fc;--muted:#9aabc2;--blue:#7cb8ff;--green:#4ade80;--yellow:#facc15;--orange:#fb923c;--red:#fb7185}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a3150 0,transparent 55%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -363,7 +363,7 @@ html[dir="rtl"] .intro-panel,html[dir="rtl"] .method-strip{text-align:right}
   </aside>
 </section>
 <section class="section">
-  <div class="sectionhead"><div><h2>Vier Signale. Ein Gesamtbild.</h2><p id="signalsLead">Jedes Signal beleuchtet einen anderen Teil des Kreditmarkts.</p></div><p>MARKTÜBERSICHT</p></div>
+  <div class="sectionhead"><div><h2>Vier Signale. Ein Gesamtbild.</h2><p id="signalsLead">Jedes Signal beleuchtet einen anderen Teil des Kreditmarkts.</p></div><p id="signalsMeta">MARKTÜBERSICHT</p></div>
   <div class="components" id="components">
     <article class="component"><div class="cname">High-Yield-OAS</div><div class="value">—</div><div class="state">Lädt …</div></article>
     <article class="component"><div class="cname">Investment-Grade-OAS</div><div class="value">—</div><div class="state">Lädt …</div></article>
@@ -471,7 +471,7 @@ function applyLanguage(lang){
  $('methodTitle').textContent=({de:'Daten mit Kontext lesen',en:'Read the data in context',es:'Interpreta los datos en contexto',ar:'اقرأ البيانات ضمن سياقها'})[currentLang];
  document.querySelector('.hero .eyebrow').textContent=d.current;$('regimeText').textContent=d.regime;document.querySelectorAll('.ticks span').forEach((e,i)=>e.textContent=d.ticks[i]);
  const ml=document.querySelectorAll('.sidegrid .mini .label'),ms=document.querySelectorAll('.sidegrid .mini small');[d.quorum,d.last,d.base].forEach((v,i)=>{if(ml[i])ml[i].textContent=v});[d.combined,d.datehint,d.cal].forEach((v,i)=>{if(ms[i])ms[i].textContent=v});
- document.querySelectorAll('.sectionhead h2')[0].textContent=d.signals;document.querySelectorAll('.sectionhead p')[1].textContent=d.hint;document.querySelector('.chartbox .sectionhead h2').textContent=d.history;document.querySelector('.chart-tools').setAttribute('aria-label',d.range);
+ document.querySelectorAll('.sectionhead h2')[0].textContent=d.signals;$('signalsMeta').textContent=({de:'MARKTÜBERSICHT',en:'MARKET OVERVIEW',es:'VISTA DEL MERCADO',ar:'نظرة عامة على السوق'})[currentLang];document.querySelector('.chartbox .sectionhead h2').textContent=d.history;document.querySelector('.chart-tools').setAttribute('aria-label',d.range);
  document.querySelectorAll('.range-btn').forEach(b=>{const y=Number(b.dataset.years);b.textContent=y===0?d.max:y+(currentLang==='de'?' J.':currentLang==='en'?'Y':currentLang==='es'?' años':' سنوات')});
  const note=document.querySelector('.chartbox .note');if(note)note.textContent=d.note;const legend=document.querySelectorAll('.chart-legend span');legend.forEach((e,i)=>{if(e.lastChild)d.legend[i]&&(e.lastChild.textContent=d.legend[i])});
  const foot=document.querySelectorAll('.footer span');if(foot[1])foot[1].textContent=d.footer;const method=document.querySelector('.footer a');if(method)method.textContent=d.method;const fl=document.querySelector('.footer').lastElementChild;if(fl&&fl.lastChild)fl.lastChild.textContent=' · '+d.disclaimer;
