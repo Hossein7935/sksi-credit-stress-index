@@ -662,9 +662,9 @@ body.light #chartWrap.is-3d #chartTip{background:rgba(249,252,255,.94)!important
 @media(prefers-reduced-motion:reduce){#chartWrap.is-3d,#chartWrap.is-3d #historyChart{transition:none!important}#chartWrap.is-3d:after{animation:none!important}}
 
 
-/* Real WebGL replaces the old CSS-shadow 3D imitation. */
+/* Babylon.js real-time 3D scene replaces the old CSS-shadow imitation. */
 #chartWrap{position:relative;overflow:hidden}
-#sksiWebGL{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#sksiWebGL{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;touch-action:pan-y}
 #historyChart{position:relative;z-index:1;background:transparent}
 #chartWrap.is-3d{transform:none!important;perspective:none!important;background:transparent!important}
 #chartWrap.is-3d #historyChart{transform:none!important;filter:none!important}
@@ -733,7 +733,7 @@ body.light #chartWrap.is-3d #chartTip{background:rgba(249,252,255,.94)!important
 </section>
 <section class="method-strip"><div class="method-mark">i</div><div><h2 id="methodTitle">Daten mit Kontext lesen</h2><p id="methodLead">Transparent, nachvollziehbar und mit klaren Grenzen.</p></div></section><footer class="footer"><span id="loadError" class="error"></span><span>Quelle: ICE BofA OAS, Moody’s Corporate Bond Yields und Chicago Fed NFCI via FRED.</span><span><a href="https://github.com/Hossein7935/sksi-credit-stress-index/blob/main/README.md" target="_blank" rel="noreferrer">Methodik & Grenzen ↗</a> · Keine Anlageberatung.</span></footer>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
 
 const SOURCES={
@@ -746,30 +746,51 @@ let chartRows=[],chartYears=0,chartSelected=null;
 const NS='http://www.w3.org/2000/svg';
 function svgEl(tag,attrs={},txt=''){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;return e;}
 /* Actual Three.js WebGL 3D scene for the SKSI history chart. */
+/* Babylon.js game-engine renderer: true WebGL geometry, glow, animated scan and camera orbit. */
 let sksi3dScene=null;
 function sksi3dDraw(rows){
  const wrap=$('chartWrap'),enabled=wrap.classList.contains('is-3d');
  if(!enabled){if(sksi3dScene)sksi3dScene.canvas.style.display='none';return;}
- if(!window.THREE){$('loadError').textContent='WebGL-Ansicht konnte nicht geladen werden.';return;}
+ if(!window.BABYLON){$('loadError').textContent='Die 3D-Engine konnte nicht geladen werden.';return;}
  let q=sksi3dScene;
- if(!q){const canvas=document.createElement('canvas');canvas.id='sksiWebGL';wrap.insertBefore(canvas,wrap.firstChild);
-  const renderer=new THREE.WebGLRenderer({canvas:canvas,alpha:true,antialias:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(43,1,.1,100);
-  scene.add(new THREE.HemisphereLight(0xb8eaff,0x101a36,2));
-  const lamp=new THREE.PointLight(0x35d9ff,35,30);lamp.position.set(-2,5,5);scene.add(lamp);
-  q=sksi3dScene={canvas:canvas,renderer:renderer,scene:scene,camera:camera,yaw:0,pitch:.42,rows:[]};}
- q.canvas.style.display='block';q.rows=rows;
- while(q.scene.children.length>2){const o=q.scene.children.pop();if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose();}
- const lightMode=document.body.classList.contains('light'),gridColor=lightMode?0x7397c8:0x176b98;
- const grid=new THREE.GridHelper(10,20,gridColor,gridColor);grid.position.y=-1.7;grid.material.transparent=true;grid.material.opacity=.38;q.scene.add(grid);
- [{v:48,c:0xfacc15},{v:68,c:0xfb923c},{v:84,c:0xfb7185}].forEach(t=>{const yy=-1.65+t.v/100*3.15;const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-4.2,yy,0),new THREE.Vector3(4.2,yy,0)]);q.scene.add(new THREE.Line(geo,new THREE.LineBasicMaterial({color:t.c,transparent:true,opacity:.8})));});
- const pts=rows.map((r,i)=>new THREE.Vector3(-4+8*i/(rows.length-1),-1.65+Math.max(0,Math.min(100,r.score))/100*3.15,Math.sin(i/(rows.length-1)*Math.PI*2)*.24));
- const curve=new THREE.CatmullRomCurve3(pts);
- q.scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(180,rows.length),.085,8,false),new THREE.MeshBasicMaterial({color:lightMode?0x528dff:0x0bbdf5,transparent:true,opacity:.18,depthWrite:false})));
- q.scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(180,rows.length),.034,8,false),new THREE.MeshStandardMaterial({color:lightMode?0x174fc2:0x8bf6ff,emissive:lightMode?0x103b9b:0x087da8,emissiveIntensity:2,metalness:.35,roughness:.2})));
- const end=pts[pts.length-1],marker=new THREE.Mesh(new THREE.SphereGeometry(.105,16,12),new THREE.MeshBasicMaterial({color:0xa5f3fc}));marker.position.copy(end);q.scene.add(marker);
- const w=Math.max(1,wrap.clientWidth),h=Math.max(1,wrap.clientHeight);q.renderer.setSize(w,h,false);q.camera.aspect=w/h;q.camera.updateProjectionMatrix();
- const dist=11;q.camera.position.set(Math.sin(q.yaw)*dist,2.5+Math.sin(q.pitch)*dist*.55,Math.cos(q.yaw)*dist*Math.cos(q.pitch));q.camera.lookAt(0,0,0);q.renderer.render(q.scene,q.camera);
+ if(!q){
+  const canvas=document.createElement('canvas');canvas.id='sksiWebGL';canvas.setAttribute('aria-label','Interaktive 3D-Darstellung des SKSI');wrap.insertBefore(canvas,wrap.firstChild);
+  const engine=new BABYLON.Engine(canvas,true,{antialias:true,stencil:true,preserveDrawingBuffer:false});
+  const scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(0.015,0.035,0.075,1);
+  const camera=new BABYLON.ArcRotateCamera('sksiCamera',-Math.PI/2,1.12,12,new BABYLON.Vector3(0,0,0),scene);
+  camera.lowerRadiusLimit=8;camera.upperRadiusLimit=18;camera.wheelPrecision=70;camera.panningSensibility=0;camera.attachControl(canvas,true);
+  const hemi=new BABYLON.HemisphericLight('sksiAmbient',new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.85;
+  const point=new BABYLON.PointLight('sksiCyanLight',new BABYLON.Vector3(-3,5,5),scene);point.diffuse=new BABYLON.Color3(.15,.8,1);point.intensity=2.1;
+  const glow=new BABYLON.GlowLayer('sksiGlow',scene,{blurKernelSize:48});glow.intensity=.65;
+  q=sksi3dScene={canvas:canvas,engine:engine,scene:scene,camera:camera,glow:glow,root:null,rows:[],scan:null,light:false};
+  engine.runRenderLoop(()=>{if(sksi3dScene&&sksi3dScene.scene.activeCamera&&sksi3dScene.canvas.style.display!=='none'){if(sksi3dScene.scan)sksi3dScene.scan.position.x=Math.sin(performance.now()*.00045)*4.15;sksi3dScene.scene.render();}});
+  window.addEventListener('resize',()=>{if(sksi3dScene)sksi3dScene.engine.resize();});
+ }
+ q.canvas.style.display='block';q.rows=rows;q.light=document.body.classList.contains('light');
+ q.scene.clearColor=q.light?new BABYLON.Color4(.88,.93,.99,1):new BABYLON.Color4(.012,.025,.055,1);
+ q.glow.intensity=q.light?.36:.8;
+ if(q.root)q.root.dispose(false,true);
+ q.root=new BABYLON.TransformNode('sksiDataScene',q.scene);
+ const add=(mesh)=>{mesh.parent=q.root;return mesh;};
+ const mat=(name,color,emissive,alpha=1)=>{const m=new BABYLON.StandardMaterial(name,q.scene);m.diffuseColor=BABYLON.Color3.FromHexString(color);m.emissiveColor=BABYLON.Color3.FromHexString(emissive);m.alpha=alpha;m.specularColor=new BABYLON.Color3(.6,.9,1);m.specularPower=96;return m;};
+ const gridMat=mat('sksiGrid',q.light?'#5f85b5':'#145678',q.light?'#284a78':'#0a4e70',q.light?.42:.6);
+ for(let x=-4.2;x<=4.201;x+=.42)add(BABYLON.MeshBuilder.CreateLines('floorGridX',{points:[new BABYLON.Vector3(x,-1.75,-2.4),new BABYLON.Vector3(x,-1.75,2.4)],updatable:false},q.scene)).material=gridMat;
+ for(let z=-2.4;z<=2.401;z+=.4)add(BABYLON.MeshBuilder.CreateLines('floorGridZ',{points:[new BABYLON.Vector3(-4.2,-1.75,z),new BABYLON.Vector3(4.2,-1.75,z)],updatable:false},q.scene)).material=gridMat;
+ [{v:48,c:'#facc15'},{v:68,c:'#fb923c'},{v:84,c:'#fb7185'}].forEach(t=>{const y=-1.65+t.v/100*3.15,m=mat('riskBand'+t.v,t.c,t.c,.85);add(BABYLON.MeshBuilder.CreateLines('riskBand',{points:[new BABYLON.Vector3(-4.2,y,0),new BABYLON.Vector3(4.2,y,0)]},q.scene)).material=m;});
+ const pts=rows.map((r,i)=>new BABYLON.Vector3(-4+8*i/(rows.length-1),-1.65+Math.max(0,Math.min(100,r.score))/100*3.15,Math.sin(i/(rows.length-1)*Math.PI*2)*.24));
+ const areaPts=[...pts,new BABYLON.Vector3(4,-1.72,0),new BABYLON.Vector3(-4,-1.72,0)];
+ const area=BABYLON.MeshBuilder.CreateRibbon('sksiVolume',{pathArray:[pts,[...pts].map(p=>new BABYLON.Vector3(p.x,-1.72,p.z))],sideOrientation:BABYLON.Mesh.DOUBLESIDE},q.scene);add(area);
+ const areaMat=mat('sksiVolumeGlass',q.light?'#76a9ff':'#08aeea',q.light?'#376dd4':'#00bde8',.14);area.material=areaMat;area.isPickable=false;
+ const glowMat=mat('sksiCurveGlow',q.light?'#65a1ff':'#04bff3',q.light?'#377cff':'#00d9ff',.32);
+ add(BABYLON.MeshBuilder.CreateTube('sksiOuterTube',{path:pts,radius:.085,tessellation:12,cap:BABYLON.Mesh.CAP_ALL},q.scene)).material=glowMat;
+ const lineMat=mat('sksiCurveCore',q.light?'#174fc2':'#9bf6ff',q.light?'#1e5de0':'#36dfff',1);
+ add(BABYLON.MeshBuilder.CreateTube('sksiCurveCore',{path:pts,radius:.027,tessellation:10,cap:BABYLON.Mesh.CAP_ALL},q.scene)).material=lineMat;
+ const pointMat=mat('sksiDataPoints',q.light?'#174fc2':'#c6fbff',q.light?'#337bff':'#35eaff',1);
+ for(let i=0;i<pts.length;i+=Math.max(1,Math.floor(pts.length/65))){const dot=BABYLON.MeshBuilder.CreateSphere('sksiPoint',{diameter:.055,segments:8},q.scene);dot.position.copyFrom(pts[i]);dot.material=pointMat;add(dot);}
+ const last=pts[pts.length-1],end=add(BABYLON.MeshBuilder.CreateSphere('sksiLatestPoint',{diameter:.2,segments:24},q.scene));end.position.copyFrom(last);end.material=mat('sksiLatestMaterial','#b9fbff','#00dfff',1);
+ const scanMat=mat('sksiScanMaterial',q.light?'#397bdb':'#00dfff',q.light?'#397bdb':'#00dfff',.3);
+ q.scan=add(BABYLON.MeshBuilder.CreateBox('sksiScanBeam',{width:.012,height:3.7,depth:.012},q.scene));q.scan.position.y=.05;q.scan.material=scanMat;q.scan.isPickable=false;
+ q.engine.resize();
 }
 function renderChart(){
  const svg=$('historyChart'),wrap=$('chartWrap'),tip=$('chartTip');if(!svg||!chartRows.length)return;
@@ -902,8 +923,8 @@ document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click
  if(chart3DButton)chart3DButton.addEventListener('click',event=>{event.stopPropagation();setChart3D(!chartWrap.classList.contains('is-3d'));});
  if(chartWrap){
    chartWrap.addEventListener('click',event=>{if(event.target.closest('.chart-tip')||event.target.closest('.range-btn')||event.target.closest('#chart3DButton')||event.target.closest('svg'))return;setChart3D(!chartWrap.classList.contains('is-3d'));});
-   chartWrap.addEventListener('pointermove',event=>{if(!sksi3dScene||!chartWrap.classList.contains('is-3d')||event.pointerType==='touch')return;const r=chartWrap.getBoundingClientRect();sksi3dScene.yaw=((event.clientX-r.left)/r.width-.5)*.8;sksi3dScene.pitch=.2+((event.clientY-r.top)/r.height)*.45;sksi3dDraw(sksi3dScene.rows);});
-   chartWrap.addEventListener('pointerleave',()=>{if(sksi3dScene){sksi3dScene.yaw=0;sksi3dScene.pitch=.42;if(chartWrap.classList.contains('is-3d'))sksi3dDraw(sksi3dScene.rows);}});
+   chartWrap.addEventListener('pointermove',event=>{if(!sksi3dScene||!chartWrap.classList.contains('is-3d')||event.pointerType==='touch')return;const r=chartWrap.getBoundingClientRect();sksi3dScene.camera.alpha=-Math.PI/2+((event.clientX-r.left)/r.width-.5)*.75;sksi3dScene.camera.beta=1.12+((event.clientY-r.top)/r.height-.5)*.32;});
+   chartWrap.addEventListener('pointerleave',()=>{if(sksi3dScene){sksi3dScene.camera.alpha=-Math.PI/2;sksi3dScene.camera.beta=1.12;}});
   }
 
  document.querySelectorAll('[data-explore]').forEach(btn=>btn.addEventListener('click',()=>{
