@@ -22,7 +22,7 @@ body.light .mini,body.light .component{background:#fff}
 body.light .btn,body.light .linkbtn{background:#fff;color:#172337}
 body.light .summary{color:#34445b}
 body.light .gauge .needle{background:#172337;box-shadow:0 0 0 2px #fff}
-body.light .interactive-chart{background:#fff}
+body.light .interactive-chart{background:#fff}#languageSelect{max-width:130px;cursor:pointer}html[dir="rtl"] body{font-family:Tahoma,Arial,sans-serif;line-height:1.7}html[dir="rtl"] .top,html[dir="rtl"] .sectionhead,html[dir="rtl"] .footer{direction:rtl}html[dir="rtl"] .scoreline{direction:ltr}html[dir="rtl"] .ticks,html[dir="rtl"] .chart-legend{direction:rtl}html[dir="rtl"] .interactive-chart{direction:ltr}
 body.light .range-btn{background:#f8fafc;color:#53657d}
 body.light .range-btn.active,body.light .range-btn:hover{background:#eaf2ff;color:#1d4ed8}
 .theme-toggle{white-space:nowrap}
@@ -37,7 +37,7 @@ body.light .range-btn.active,body.light .range-btn:hover{background:#eaf2ff;colo
 <main>
 <header class="top">
   <div class="brand"><div class="logo">SK</div><div><div class="eyebrow">Market monitor</div><h1>Credit Stress Index</h1><p class="subtitle">Synchronisierter Kreditstress-Index · USA</p></div></div>
-  <div class="actions"><a class="linkbtn" href="https://github.com/Hossein7935/sksi-credit-stress-index" target="_blank" rel="noreferrer">Quellcode ↗</a><button class="btn theme-toggle" id="themeToggle" type="button">☀ Hell</button><button class="btn" id="refresh">↻ Aktualisieren</button></div>
+  <div class="actions"><a class="linkbtn" href="https://github.com/Hossein7935/sksi-credit-stress-index" target="_blank" rel="noreferrer">Quellcode ↗</a><select id="languageSelect" class="btn" aria-label="Language"><option value="de">Deutsch</option><option value="en">English</option><option value="es">Español</option><option value="ar">العربية</option></select><button class="btn theme-toggle" id="themeToggle" type="button">☀ Hell</button><button class="btn" id="refresh">↻ Aktualisieren</button></div>
 </header>
 <p class="statusline" id="updated">Lade aktuelle Daten …</p>
 <section class="hero">
@@ -119,24 +119,53 @@ function renderChart(){
 function showChartPoint(i,cx,cy,lock){
  const svg=$('historyChart'),tip=$('chartTip'),wrap=$('chartWrap');if(!svg._chart)return;const c=svg._chart,r=c.rows[i];if(!r)return;
  const px=c.x(i),py=c.y(r.score),cross=svg.querySelector('#crosshair');cross.setAttribute('visibility','visible');svg.querySelector('#crossV').setAttribute('x1',px);svg.querySelector('#crossV').setAttribute('x2',px);svg.querySelector('#crossH').setAttribute('y1',py);svg.querySelector('#crossH').setAttribute('y2',py);svg.querySelector('#crossDot').setAttribute('cx',px);svg.querySelector('#crossDot').setAttribute('cy',py);
- tip.innerHTML='<span>'+r.date.split('-').reverse().join('.')+'</span><strong>'+fmt(r.score,2)+' / 100</strong><span>'+({normal:'Ruhig',watch:'Erhöht',stress:'Stress',severe:'Schwerer Stress'}[r.regime]||r.regime)+(r.quorum==='1'?' · Quorum':'')+'</span>';tip.style.display='block';
+ tip.innerHTML='<span>'+r.date.split('-').reverse().join('.')+'</span><strong>'+fmt(r.score,2)+' / 100</strong><span>'+({normal:tr('normal'),watch:tr('watch'),stress:tr('stress'),severe:tr('severe')}[r.regime]||r.regime)+(r.quorum==='1'?' · Quorum':'')+'</span>';tip.style.display='block';
  const wr=wrap.getBoundingClientRect();let left=cx-wr.left+12,top=cy-wr.top-65;if(left+160>wr.width)left=Math.max(6,left-175);if(top<5)top=cy-wr.top+14;tip.style.left=Math.max(5,Math.min(wr.width-165,left))+'px';tip.style.top=top+'px';
  if(lock){chartSelected=true;window.setTimeout(()=>{chartSelected=false;},5000);}
 }
 async function loadChart(){
  try{const r=await fetch(CSV_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('CSV HTTP '+r.status);const csv=await r.text();chartRows=csv.trim().split(/\r?\n/).slice(1).map(line=>{const p=line.split(',');return {date:p[0],score:Number(p[1]),regime:p[2],quorum:p[3]};}).filter(r=>r.date&&Number.isFinite(r.score));renderChart();}
- catch(e){$('historyChart').replaceChildren(svgEl('text',{x:500,y:175,fill:'#fda4af','text-anchor':'middle','font-size':15},'Historischer Verlauf konnte nicht geladen werden.'));$('loadError').textContent='Chart-Fehler: '+e.message;}
+ catch(e){$('historyChart').replaceChildren(svgEl('text',{x:500,y:175,fill:'#fda4af','text-anchor':'middle','font-size':15},tr('chartfailed')));$('loadError').textContent=tr('charterror')+e.message;}
+}
+
+
+const LANG_KEY='sksi-language';
+const LANG={
+de:{code:'Quellcode ↗',refresh:'↻ Aktualisieren',light:'☀ Hell',dark:'☾ Dunkel',loading:'Lade aktuelle Daten …',current:'Aktueller Wochenwert',regime:'Daten werden geladen',ticks:['0 · ruhig','48 · erhöht','68 · Stress','84 · schwer','100'],summary:'Der aktuelle Stand wird geladen.',quorum:'Quorum – alle vier Signale erhöht',combined:'Gemeinsames Stresssignal',last:'Letzte verfügbare Woche',datehint:'Datum der Daten, nicht der Seitenaufruf',base:'Modell-Basis',cal:'Kalibrierung bleibt eingefroren',signals:'Die vier Stress-Signale',hint:'Marktwerte und Abstand zum Normalniveau',history:'Historischer Verlauf seit 1997',range:'Zeitraum wählen',max:'Max.',legend:['SKSI-Wert','Erhöht ab 48','Stress ab 68','Schwer ab 84'],note:'Bewege den Mauszeiger über die Linie oder tippe auf den Chart, um Datum und Wert zu sehen. Mit 5 J. / 10 J. / Max. kannst du den Zeitraum ändern. Historische Daten sind rückblickend und keine sichere Vorhersage.',source:'Quelle öffnen ↗',footer:'Quelle: ICE BofA OAS, Moody’s Corporate Bond Yields und Chicago Fed NFCI via FRED.',method:'Methodik & Grenzen ↗',disclaimer:'Keine Anlageberatung.',normal:'Ruhig',watch:'Erhöht',stress:'Stress',severe:'Schwerer Stress',yes:'JA · Warnsignal',no:'NEIN · kein Quorum',yesdetail:'Alle vier Komponenten sind gleichzeitig erhöht.',nodetail:'Nicht alle vier Signale sind gleichzeitig erhöht.',failed:'Daten konnten nicht geladen werden.',chartfailed:'Historischer Verlauf konnte nicht geladen werden.',error:'Fehler: ',retry:' · Bitte erneut versuchen.',updated:'Datenstand: ',success:' · erfolgreich geladen',charterror:'Chart-Fehler: ',z:'z-Wert:'},
+en:{code:'Source code ↗',refresh:'↻ Refresh',light:'☀ Light',dark:'☾ Dark',loading:'Loading latest data …',current:'Current weekly value',regime:'Loading data',ticks:['0 · calm','48 · elevated','68 · stress','84 · severe','100'],summary:'Loading the latest reading.',quorum:'Quorum – all four signals elevated',combined:'Combined stress signal',last:'Latest available week',datehint:'Data date, not page-visit date',base:'Model baseline',cal:'Calibration remains fixed',signals:'The four stress signals',hint:'Market values and distance from normal',history:'Historical index since 1997',range:'Choose time range',max:'Max',legend:['SKSI value','Elevated from 48','Stress from 68','Severe from 84'],note:'Move your mouse over the line or tap the chart to see the date and value. Use 5Y / 10Y / Max to change the range. Historical data is backward-looking, not a reliable forecast.',source:'Open source ↗',footer:'Sources: ICE BofA OAS, Moody’s Corporate Bond Yields and Chicago Fed NFCI via FRED.',method:'Methodology & limits ↗',disclaimer:'Not investment advice.',normal:'Calm',watch:'Elevated',stress:'Stress',severe:'Severe stress',yes:'YES · Warning signal',no:'NO · No quorum',yesdetail:'All four components are elevated at the same time.',nodetail:'Not all four signals are elevated at the same time.',failed:'Could not load data.',chartfailed:'Could not load historical data.',error:'Error: ',retry:' · Please try again.',updated:'Data as of: ',success:' · loaded successfully',charterror:'Chart error: ',z:'z-score:'},
+es:{code:'Código fuente ↗',refresh:'↻ Actualizar',light:'☀ Claro',dark:'☾ Oscuro',loading:'Cargando datos actuales …',current:'Valor semanal actual',regime:'Cargando datos',ticks:['0 · tranquilo','48 · elevado','68 · estrés','84 · grave','100'],summary:'Cargando el último valor.',quorum:'Quórum: las cuatro señales elevadas',combined:'Señal conjunta de estrés',last:'Última semana disponible',datehint:'Fecha de los datos, no de la visita',base:'Base del modelo',cal:'La calibración permanece fija',signals:'Las cuatro señales de estrés',hint:'Valores de mercado y distancia al nivel normal',history:'Historial del índice desde 1997',range:'Elegir período',max:'Máx.',legend:['Valor SKSI','Elevado desde 48','Estrés desde 68','Grave desde 84'],note:'Pasa el cursor por la línea o toca el gráfico para ver la fecha y el valor. Usa 5 años / 10 años / Máx. para cambiar el período. Los datos históricos no son una predicción segura.',source:'Abrir fuente ↗',footer:'Fuentes: ICE BofA OAS, rendimientos de bonos corporativos de Moody’s y NFCI de la Fed de Chicago vía FRED.',method:'Metodología y límites ↗',disclaimer:'No es asesoramiento financiero.',normal:'Tranquilo',watch:'Elevado',stress:'Estrés',severe:'Estrés grave',yes:'SÍ · Señal de alerta',no:'NO · Sin quórum',yesdetail:'Los cuatro componentes están elevados a la vez.',nodetail:'No todas las señales están elevadas a la vez.',failed:'No se pudieron cargar los datos.',chartfailed:'No se pudo cargar el historial.',error:'Error: ',retry:' · Inténtalo de nuevo.',updated:'Datos hasta: ',success:' · cargado correctamente',charterror:'Error del gráfico: ',z:'Puntuación z:'},
+ar:{code:'الكود المصدري ↗',refresh:'↻ تحديث',light:'☀ فاتح',dark:'☾ داكن',loading:'جارٍ تحميل أحدث البيانات …',current:'القيمة الأسبوعية الحالية',regime:'جارٍ تحميل البيانات',ticks:['0 · هادئ','48 · مرتفع','68 · ضغط','84 · حاد','100'],summary:'جارٍ تحميل القراءة الأخيرة.',quorum:'الإجماع — ارتفاع المؤشرات الأربعة',combined:'إشارة ضغط مجمعة',last:'أحدث أسبوع متاح',datehint:'تاريخ البيانات وليس تاريخ زيارة الصفحة',base:'خط أساس النموذج',cal:'المعايرة ثابتة',signals:'مؤشرات الضغط الأربعة',hint:'قيم السوق والابتعاد عن المستوى الطبيعي',history:'السجل التاريخي للمؤشر منذ 1997',range:'اختر الفترة',max:'الكل',legend:['قيمة SKSI','ارتفاع من 48','ضغط من 68','ضغط حاد من 84'],note:'حرّك المؤشر فوق الخط أو المس الرسم لعرض التاريخ والقيمة. اختر 5 سنوات أو 10 سنوات أو الكل لتغيير الفترة. البيانات التاريخية لا تمثل توقعاً مؤكداً.',source:'فتح المصدر ↗',footer:'المصادر: ICE BofA OAS وعوائد سندات الشركات من Moody’s ومؤشر NFCI لبنك شيكاغو الفيدرالي عبر FRED.',method:'المنهجية والحدود ↗',disclaimer:'ليس نصيحة استثمارية.',normal:'هادئ',watch:'مرتفع',stress:'ضغط',severe:'ضغط حاد',yes:'نعم · إشارة تحذير',no:'لا · لا يوجد إجماع',yesdetail:'المؤشرات الأربعة مرتفعة في الوقت نفسه.',nodetail:'ليست جميع المؤشرات مرتفعة في الوقت نفسه.',failed:'تعذر تحميل البيانات.',chartfailed:'تعذر تحميل البيانات التاريخية.',error:'خطأ: ',retry:' · يرجى المحاولة مجدداً.',updated:'البيانات حتى: ',success:' · تم التحميل بنجاح',charterror:'خطأ في الرسم: ',z:'درجة z:'}
+};
+let currentLang='de';function tr(k){return (LANG[currentLang]||LANG.de)[k]||LANG.de[k]||k;}
+function applyLanguage(lang){
+ currentLang=LANG[lang]?lang:'de';try{localStorage.setItem(LANG_KEY,currentLang)}catch(e){}
+ document.documentElement.lang=currentLang;document.documentElement.dir=currentLang==='ar'?'rtl':'ltr';const d=LANG[currentLang];
+ document.querySelector('.actions .linkbtn').textContent=d.code;$('refresh').textContent=d.refresh;
+ $('themeToggle').textContent=document.body.classList.contains('light')?d.dark:d.light;
+ document.querySelector('.subtitle').textContent=({de:'Synchronisierter Kreditstress-Index · USA',en:'Synchronized Credit Stress Index · USA',es:'Índice sincronizado de estrés crediticio · EE. UU.',ar:'مؤشر متزامن لضغط الائتمان · الولايات المتحدة'})[currentLang];
+ document.querySelector('.hero .eyebrow').textContent=d.current;$('regimeText').textContent=d.regime;document.querySelectorAll('.ticks span').forEach((e,i)=>e.textContent=d.ticks[i]);
+ const ml=document.querySelectorAll('.sidegrid .mini .label'),ms=document.querySelectorAll('.sidegrid .mini small');[d.quorum,d.last,d.base].forEach((v,i)=>{if(ml[i])ml[i].textContent=v});[d.combined,d.datehint,d.cal].forEach((v,i)=>{if(ms[i])ms[i].textContent=v});
+ document.querySelectorAll('.sectionhead h2')[0].textContent=d.signals;document.querySelector('.sectionhead p').textContent=d.hint;document.querySelector('.chartbox .sectionhead h2').textContent=d.history;document.querySelector('.chart-tools').setAttribute('aria-label',d.range);
+ document.querySelectorAll('.range-btn').forEach(b=>{const y=Number(b.dataset.years);b.textContent=y===0?d.max:y+(currentLang==='de'?' J.':currentLang==='en'?'Y':currentLang==='es'?' años':' سنوات')});
+ const note=document.querySelector('.chartbox .note');if(note)note.textContent=d.note;const legend=document.querySelectorAll('.chart-legend span');legend.forEach((e,i)=>{if(e.lastChild)d.legend[i]&&(e.lastChild.textContent=d.legend[i])});
+ const foot=document.querySelectorAll('.footer span');if(foot[1])foot[1].textContent=d.footer;const method=document.querySelector('.footer a');if(method)method.textContent=d.method;const fl=document.querySelector('.footer').lastElementChild;if(fl&&fl.lastChild)fl.lastChild.textContent=' · '+d.disclaimer;
+ document.querySelectorAll('.source-link').forEach(e=>e.textContent=d.source);
+ if($('summary').dataset.fallback==='1')$('summary').textContent=d.summary;
+ if(chartRows.length)renderChart();
 }
 
 const THEME_KEY='sksi-theme';
 function setTheme(mode){
  const light=mode==='light';document.body.classList.toggle('light',light);
- const btn=document.getElementById('themeToggle');if(btn){btn.textContent=light?'☾ Dunkel':'☀ Hell';btn.setAttribute('aria-pressed',String(light));}
+ const btn=document.getElementById('themeToggle');if(btn){btn.textContent=light?tr('dark'):tr('light');btn.setAttribute('aria-pressed',String(light));}
  try{localStorage.setItem(THEME_KEY,light?'light':'dark');}catch(e){}
  if(chartRows.length)renderChart();
 }
 try{setTheme(localStorage.getItem(THEME_KEY)==='light'?'light':'dark');}catch(e){setTheme('dark');}
 document.getElementById('themeToggle').addEventListener('click',()=>setTheme(document.body.classList.contains('light')?'dark':'light'));
+document.getElementById('languageSelect').addEventListener('change',e=>applyLanguage(e.target.value));
+try{document.getElementById('languageSelect').value=localStorage.getItem(LANG_KEY)||'de'}catch(e){}
+applyLanguage(document.getElementById('languageSelect').value||'de');
 document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click',()=>{chartYears=Number(btn.dataset.years);document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',b===btn));chartSelected=false;renderChart();}));
 window.addEventListener('resize',()=>{if(chartRows.length)renderChart();});
 
@@ -147,27 +176,27 @@ const fmt=(n,d=2)=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:d,max
 function regimeInfo(regime){return ({normal:{label:'RUHIG',color:'#4ade80',bg:'#183b2b'},watch:{label:'ERHÖHT',color:'#facc15',bg:'#463915'},stress:{label:'STRESS',color:'#fb923c',bg:'#482719'},severe:{label:'SCHWERER STRESS',color:'#fb7185',bg:'#4a1d2a'}})[regime]||{label:String(regime||'UNBEKANNT').toUpperCase(),color:'#9aabc2',bg:'#25344a'};}
 function stateInfo(state){const s=String(state||'normal').toLowerCase();if(s.includes('hoch')||s.includes('stress'))return '#fb923c';if(s.includes('niedrig'))return '#7cb8ff';return '#4ade80';}
 async function loadData(){
-  $('refresh').disabled=true;$('loadError').textContent='';$('updated').textContent='Daten werden abgerufen …';
+  $('refresh').disabled=true;$('loadError').textContent='';$('updated').textContent=tr('loading');
   try{
     const res=await fetch(DATA_URL+'?t='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error('Datenquelle antwortet mit HTTP '+res.status);
     const d=await res.json();
     $('score').textContent=fmt(d.score,1);$('date').textContent=d.date?d.date.split('-').reverse().join('.'): '—';
-    const info=regimeInfo(d.regime);$('regime').style.color=info.color;$('regime').style.background=info.bg;$('regimeText').textContent=info.label;
+    const info=regimeInfo(d.regime);info.label=tr(['normal','watch','stress','severe'].includes(d.regime)?d.regime:'normal');$('regime').style.color=info.color;$('regime').style.background=info.bg;$('regimeText').textContent=info.label;
     $('needle').style.left=Math.max(0,Math.min(100,Number(d.score)||0))+'%';
     $('summary').textContent=d.summary||'Kein Kurzbericht verfügbar.';
-    $('quorum').textContent=d.quorum?'JA · Warnsignal':'NEIN · kein Quorum';$('quorum').style.color=d.quorum?'#fb7185':'#4ade80';
-    $('quorumDetail').textContent=d.quorum?'Alle vier Komponenten sind gleichzeitig erhöht.':'Nicht alle vier Signale sind gleichzeitig erhöht.';
+    $('quorum').textContent=d.quorum?tr('yes'):tr('no');$('quorum').style.color=d.quorum?'#fb7185':'#4ade80';
+    $('quorumDetail').textContent=d.quorum?tr('yesdetail'):tr('nodetail');
     const names={hy:'High-Yield-OAS',ig:'Investment-Grade-OAS',def:'Ausfallprämie (Baa − Aaa)',nfci:'Chicago Fed NFCI'};
     const units={hy:'%',ig:'%',def:'Prozentpunkte',nfci:'Indexpunkte'};
     $('components').innerHTML=Object.entries(d.components||{}).map(([key,c])=>{
       const color=stateInfo(c.state);const val=Number(c.value);
       const source=SOURCES[key];return '<div class="component"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+(c.state||'unbekannt')+'</div><div class="zscore">z-Wert: '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div>'+(source?'<img class="source-spark" loading="lazy" src="'+source.chart+'&t='+Date.now()+'" alt="Chart: '+(names[key]||c.name||key)+'" onerror="this.alt=\'Chart konnte nicht geladen werden\';this.style.display=\'none\'"><a class="source-link" href="'+source.url+'" target="_blank" rel="noreferrer">Quelle öffnen ↗</a>':'')+'</div>';
     }).join('');
-    $('updated').textContent='Datenstand: '+(d.date?d.date.split('-').reverse().join('.'): 'unbekannt')+' · erfolgreich geladen';
-  }catch(e){$('updated').textContent='Daten konnten nicht geladen werden.';$('loadError').textContent='Fehler: '+e.message+' · Bitte erneut versuchen.';}
+    $('updated').textContent=tr('updated')+(d.date?d.date.split('-').reverse().join('.'): '—')+tr('success');
+  }catch(e){$('updated').textContent=tr('failed');$('loadError').textContent=tr('error')+e.message+tr('retry');}
   finally{$('refresh').disabled=false;}
 }
-$('refresh').addEventListener('click',loadData);loadData();loadChart();
+$('refresh').addEventListener('click',loadData);loadData().then(()=>applyLanguage(currentLang));loadChart();
 </script>
 </body>
 </html>
