@@ -31,6 +31,117 @@ body.light .range-btn.active,body.light .range-btn:hover{background:#eaf2ff;colo
 .component-link{overflow:hidden}
 @media(max-width:760px){.source-spark{height:110px}}
 
+
+/* SKSI visual refresh — premium market terminal */
+:root{
+ --bg:#070b14;--panel:#0d1524;--panel2:#101b2d;--line:rgba(148,174,209,.17);
+ --text:#f2f6fc;--muted:#94a6bf;--blue:#73b5ff;--green:#4ee0a0;
+ --shadow:0 18px 50px rgba(0,0,0,.22);--radius:20px;
+}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.012em;background:radial-gradient(ellipse at 12% 0%,rgba(34,100,180,.16),transparent 32%),radial-gradient(ellipse at 92% 18%,rgba(20,184,166,.08),transparent 28%),var(--bg)}
+main{max-width:1320px;padding:30px 26px 64px}
+.top{padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.logo{width:48px;height:48px;border-radius:15px;background:linear-gradient(145deg,#a5d4ff 0%,#4b91f5 55%,#2563eb 100%);box-shadow:0 8px 24px rgba(59,130,246,.28);font-size:16px}
+.eyebrow{font-size:10px;letter-spacing:.19em;color:#8cc4ff}
+.brand h1{font-size:25px;font-weight:750;letter-spacing:-.055em}
+.subtitle{font-size:12px;letter-spacing:.01em}
+.actions{gap:8px}
+.btn,.linkbtn{background:rgba(17,29,47,.78);border-color:var(--line);border-radius:11px;padding:10px 13px;transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
+.btn:hover,.linkbtn:hover{border-color:rgba(115,181,255,.65);background:#172942;box-shadow:0 5px 18px rgba(0,0,0,.12);transform:translateY(-1px)}
+#refresh{background:linear-gradient(135deg,#2678e8,#3b91ff);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 6px 20px rgba(37,99,235,.22)}
+#refresh:hover{background:linear-gradient(135deg,#3587f6,#5ba2ff)}
+#languageSelect{max-width:135px}
+.statusline{display:flex;align-items:center;gap:8px;margin:16px 0 14px;font-size:11px;letter-spacing:.025em}
+.statusline:before{content:"";width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.1)}
+.hero{grid-template-columns:minmax(0,1.38fr) minmax(260px,.62fr);gap:18px}
+.panel{background:linear-gradient(145deg,rgba(17,29,48,.96),rgba(10,18,31,.98));border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero>.panel:before{content:"";position:absolute;top:0;left:28px;right:28px;height:1px;background:linear-gradient(90deg,transparent,rgba(115,181,255,.7),transparent)}
+.hero>.panel:after{content:"";position:absolute;right:-90px;top:-125px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.12),transparent 68%);pointer-events:none}
+.hero>.panel>*{position:relative;z-index:1}
+.panel h2{font-size:14px;font-weight:700}
+.scoreline{gap:12px;margin:13px 0 15px}
+.score{font-size:clamp(68px,8.6vw,94px);font-variant-numeric:tabular-nums;line-height:.95;text-shadow:0 6px 32px rgba(96,165,250,.12)}
+.outof{font-size:15px;padding-bottom:8px}
+.regime{padding:7px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);color:#63e6ad}
+.gauge{height:8px;margin:26px 0 9px;background:linear-gradient(90deg,#34d399 0 48%,#facc15 48% 68%,#fb923c 68% 84%,#fb7185 84% 100%);box-shadow:inset 0 1px 3px #0005}
+.needle{height:19px;top:-5px;width:3px;box-shadow:0 0 0 3px rgba(7,11,20,.85),0 0 12px #fff8}
+.ticks{font-size:9px;letter-spacing:.01em}
+.summary{font-size:13px;line-height:1.8;color:#d6e2f2;max-width:66ch}
+.sidegrid{gap:10px}
+.mini{position:relative;overflow:hidden;background:linear-gradient(120deg,rgba(16,28,46,.92),rgba(12,21,35,.8));border:1px solid var(--line);border-radius:16px;padding:16px 17px;transition:transform .18s ease,border-color .18s ease}
+.mini:after{content:"";position:absolute;right:-26px;bottom:-45px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(96,165,250,.1),transparent 70%);pointer-events:none}
+.mini:hover{transform:translateY(-2px);border-color:rgba(115,181,255,.36)}
+.mini .label{font-size:11px;letter-spacing:.025em}
+.mini strong{font-size:23px;font-weight:750;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.mini small{font-size:10px}
+.section{margin-top:24px}
+.sectionhead{margin-bottom:14px;gap:12px}
+.sectionhead h2{font-size:17px;font-weight:750;letter-spacing:-.035em}
+.sectionhead p{font-size:11px}
+.components{gap:14px}
+.component{position:relative;background:linear-gradient(155deg,rgba(17,29,47,.97),rgba(11,19,32,.98));border:1px solid var(--line);border-radius:17px;padding:18px;box-shadow:0 8px 26px rgba(0,0,0,.08);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.component:before{content:"";position:absolute;top:0;left:18px;right:18px;height:1px;background:linear-gradient(90deg,transparent,rgba(148,174,209,.22),transparent)}
+.component-link:hover{transform:translateY(-3px);border-color:rgba(115,181,255,.52);box-shadow:0 15px 30px rgba(0,0,0,.18)}
+.component .cname{font-size:11px;line-height:1.5;min-height:34px;letter-spacing:.015em}
+.component .value{font-size:29px;font-weight:760;letter-spacing:-.055em;font-variant-numeric:tabular-nums;margin:7px 0}
+.component .unit{font-size:11px}
+.state{font-size:10px;letter-spacing:.09em}
+.zscore{font-size:11px}
+.source-spark{border-color:rgba(148,174,209,.18);border-radius:10px;background:#0a1220}
+.source-chart-tip{font-size:10px;line-height:1.4}
+.source-link{font-weight:650;letter-spacing:.01em}
+.chartbox{margin-top:24px}
+.chart-tools{padding:4px;background:rgba(6,13,23,.5);border:1px solid var(--line);border-radius:10px}
+.range-btn{border:0;border-radius:7px;background:transparent;padding:7px 11px;font-weight:650}
+.range-btn.active,.range-btn:hover{background:#1b3150;color:#eaf4ff;box-shadow:inset 0 0 0 1px rgba(115,181,255,.22)}
+.interactive-chart{border-radius:15px;background:linear-gradient(180deg,#0b1422,#09111d);border-color:rgba(148,174,209,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.chart-tip{background:rgba(5,12,23,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:rgba(148,174,209,.28);border-radius:11px;box-shadow:0 12px 34px rgba(0,0,0,.3)}
+.chart-legend{gap:18px;font-size:11px}
+.note{font-size:11px;line-height:1.7}
+.footer{border-top:1px solid var(--line);padding-top:18px;margin-top:28px;font-size:11px}
+.footer a{font-weight:650}
+body.light{--bg:#f4f7fb;--panel:#fff;--panel2:#fff;--line:#dce5f0;--text:#172337;--muted:#65758c;background:radial-gradient(ellipse at 12% 0%,rgba(96,165,250,.13),transparent 34%),radial-gradient(ellipse at 90% 10%,rgba(45,212,191,.08),transparent 28%),var(--bg)}
+body.light .panel{background:linear-gradient(145deg,#fff,#f9fbff);border-color:#dce5f0;box-shadow:0 18px 45px rgba(28,48,80,.07)}
+body.light .mini,body.light .component{background:linear-gradient(150deg,#fff,#fbfcff);border-color:#dce5f0;box-shadow:0 8px 25px rgba(28,48,80,.045)}
+body.light .btn,body.light .linkbtn{background:rgba(255,255,255,.9);border-color:#dce5f0;color:#24364f}
+body.light #refresh{background:linear-gradient(135deg,#2678e8,#3b91ff);color:#fff}
+body.light .summary{color:#3e5068}
+body.light .chart-tools{background:#f1f5fa;border-color:#dce5f0}
+body.light .range-btn.active,body.light .range-btn:hover{background:#e3efff;color:#1d4ed8}
+body.light .interactive-chart{background:#fff;border-color:#dce5f0}
+body.light .source-spark{background:#fff}
+@media(max-width:760px){
+ main{padding:18px 13px 38px}
+ .top{align-items:flex-start;padding-bottom:17px}
+ .brand h1{font-size:21px}
+ .actions{width:100%;flex-wrap:wrap}
+ .actions .linkbtn{margin-right:auto}
+ .hero{grid-template-columns:1fr;gap:12px}
+ .panel{padding:19px}
+ .hero>.panel{min-height:300px}
+ .components{gap:10px}
+ .component{padding:14px;border-radius:14px}
+ .component .value{font-size:25px}
+ .mini{padding:14px 15px}
+ .section{margin-top:20px}
+ .chartbox{padding:15px}
+ .sectionhead{align-items:flex-start}
+}
+@media(max-width:420px){
+ .brand{gap:10px}
+ .logo{width:42px;height:42px}
+ .brand h1{font-size:19px}
+ .subtitle{font-size:11px}
+ .actions .btn,.actions .linkbtn{padding:8px 10px;font-size:12px}
+ #languageSelect{max-width:112px}
+ .score{font-size:66px}
+ .ticks{font-size:8px}
+ .component .value{font-size:23px}
+ .chart-tools{gap:2px}
+ .range-btn{padding:6px 8px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
 </style>
 </head>
 <body>
