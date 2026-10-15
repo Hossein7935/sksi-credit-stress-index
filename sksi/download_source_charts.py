@@ -1,72 +1,34 @@
-"""Refresh local SVG source charts using the public FRED graph CSV endpoint.
-
-FRED's PNG renderer can time out on long historical ranges. This downloads the
-official observations and draws lightweight SVG charts hosted by this repository.
-"""
+"""Regenerate local SVG source charts from the same public FRED data as SKSI."""
 from __future__ import annotations
 
-import csv
 import html
-import io
 import shutil
 from datetime import date
 from pathlib import Path
-from urllib.request import Request, urlopen
+
+from .update import fetch_series
 
 ROOT = Path(__file__).resolve().parent.parent
-START = "1997-01-01"
 CHARTS = {
-    "hy": (["BAMLH0A0HYM2"], "ICE BofA US High Yield Index Option-Adjusted Spread", "High-Yield OAS", "#c026d3"),
-    "ig": (["BAMLC0A0CM"], "ICE BofA US Corporate Index Option-Adjusted Spread", "Investment-Grade OAS", "#0284c7"),
-    "def": (["DBAA", "DAAA"], "Moody's Baa minus Aaa Corporate Bond Yield", "Baa − Aaa spread", "#ea580c"),
-    "nfci": (["NFCI"], "Chicago Fed National Financial Conditions Index", "NFCI", "#059669"),
+    "hy": ("ICE BofA US High Yield Index Option-Adjusted Spread", "High-Yield OAS", "#c026d3"),
+    "ig": ("ICE BofA US Corporate Index Option-Adjusted Spread", "Investment-Grade OAS", "#0284c7"),
+    "def": ("Moody's Baa minus Aaa Corporate Bond Yield", "Baa − Aaa spread", "#ea580c"),
+    "nfci": ("Chicago Fed National Financial Conditions Index", "NFCI", "#059669"),
 }
 
 
-def get_series(ids: list[str]) -> list[tuple[date, list[float | None]]]:
-    url = "https://fred.stlouisfed.org/graph/fredgraph.csv" + f"?id={','.join(ids)}&cosd={START}"
-    request = Request(url, headers={"User-Agent": "SKSI-Credit-Stress-Index/1.0"})
-    with urlopen(request, timeout=25) as response:
-        payload = response.read().decode("utf-8-sig")
-    reader = csv.DictReader(io.StringIO(payload))
-    if not reader.fieldnames or len(reader.fieldnames) < 2:
-        raise RuntimeError(f"Unexpected FRED CSV response for {','.join(ids)}")
-    date_key = reader.fieldnames[0]
-    rows: list[tuple[date, list[float | None]]] = []
-    for row in reader:
-        try:
-            dt = date.fromisoformat(row[date_key])
-        except (ValueError, TypeError):
-            continue
-        vals: list[float | None] = []
-        for series_id in ids:
-            raw = (row.get(series_id) or "").strip()
-            try:
-                vals.append(float(raw) if raw and raw != "." else None)
-            except ValueError:
-                vals.append(None)
-        if len(ids) == 2:
-            baa, aaa = vals
-            vals = [baa - aaa if baa is not None and aaa is not None else None]
-        rows.append((dt, vals))
-    if len(rows) < 10:
-        raise RuntimeError(f"Too few observations returned by FRED for {','.join(ids)}")
-    return rows
-
-
 def svg_chart(title: str, label: str, color: str,
-              rows: list[tuple[date, list[float | None]]]) -> str:
+              rows: list[tuple[date, float]]) -> str:
     width, height = 1000, 360
     left, right, top, bottom = 78, 28, 46, 44
     plot_w, plot_h = width - left - right, height - top - bottom
-    valid = [(dt, vals) for dt, vals in rows if vals and vals[0] is not None]
-    if len(valid) < 2:
-        raise RuntimeError(f"Not enough valid observations for chart: {title}")
-    values = [vals[0] for _, vals in valid if vals[0] is not None]
+    if len(rows) < 2:
+        raise RuntimeError(f"Not enough observations for chart: {title}")
+    values = [v for _, v in rows]
     low, high = min(values), max(values)
     padding = (high - low) * 0.08 if high > low else 1.0
     low, high = low - padding, high + padding
-    start, end = valid[0][0], valid[-1][0]
+    start, end = rows[0][0], rows[-1][0]
     span = max((end - start).days, 1)
 
     def x(dt: date) -> float:
@@ -95,7 +57,7 @@ def svg_chart(title: str, label: str, color: str,
         xx = x(dt)
         parts.append(f'<line x1="{xx:.2f}" y1="{top}" x2="{xx:.2f}" y2="{height-bottom}" stroke="#f0f3f7" stroke-width="1"/>')
         parts.append(f'<text x="{xx:.2f}" y="{height-16}" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#53657a">{year}</text>')
-    points = " ".join(f"{x(dt):.2f},{y(vals[0]):.2f}" for dt, vals in valid if vals[0] is not None)
+    points = " ".join(f"{x(dt):.2f},{y(value):.2f}" for dt, value in rows)
     parts.append(f'<polyline fill="none" stroke="{color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="{points}"/>')
     parts.append(f'<line x1="{left}" y1="{height-17}" x2="{left+20}" y2="{height-17}" stroke="{color}" stroke-width="3"/>')
     parts.append(f'<text x="{left+27}" y="{height-13}" font-family="Arial,sans-serif" font-size="12" fill="#53657a">{html.escape(label)}</text>')
@@ -104,8 +66,10 @@ def svg_chart(title: str, label: str, color: str,
 
 
 def main() -> None:
-    for key, (ids, title, label, color) in CHARTS.items():
-        rows = get_series(ids)
+    # Use the exact same official FRED series fetcher as the SKSI calculation.
+    series = fetch_series()
+    for key, (title, label, color) in CHARTS.items():
+        rows = sorted((dt.date(), float(value)) for dt, value in series[key].items())
         content = svg_chart(title, label, color, rows)
         root_chart = ROOT / "charts" / f"{key}.svg"
         docs_chart = ROOT / "docs" / "charts" / f"{key}.svg"
