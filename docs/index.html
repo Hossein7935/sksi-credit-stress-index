@@ -558,6 +558,26 @@ body.light .source-spark.is-expanded svg .mini-line{stroke:#1d4ed8!important;fil
 @media(max-width:760px){.source-spark.is-expanded{height:155px!important;transform:perspective(850px) translateY(-5px) scale(1.3)!important;transform-origin:center center!important}}
 @media(prefers-reduced-motion:reduce){.source-spark.is-expanded{transition:none!important}}
 
+
+/* Stronger cinematic 3D: perspective, parallax layers, animated energy rim */
+.source-spark{transform-style:preserve-3d!important;perspective:1200px;transition:transform .42s cubic-bezier(.16,1,.3,1),box-shadow .42s ease,border-color .3s ease,background .3s ease!important;will-change:transform;isolation:isolate}
+.source-spark svg{transform:translateZ(30px) scale(1.015);transform-origin:center;transition:transform .42s cubic-bezier(.16,1,.3,1),filter .42s ease!important;overflow:visible}
+.source-spark .source-hover-tip{transform:translateZ(54px);box-shadow:0 12px 34px rgba(0,0,0,.32),0 0 20px rgba(34,211,238,.12)}
+.source-spark.is-expanded{transform:perspective(1000px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)) translate3d(0,-18px,80px) scale(1.3)!important;transform-style:preserve-3d!important;animation:holoLaunch .62s cubic-bezier(.16,1,.3,1) both;background:linear-gradient(145deg,rgba(5,17,36,.9),rgba(5,12,27,.72) 55%,rgba(18,36,70,.82))!important}
+.source-spark.is-expanded svg{transform:translateZ(44px) scale(1.025) rotateX(1deg)!important;filter:drop-shadow(0 18px 24px rgba(0,0,0,.34)) drop-shadow(0 0 14px rgba(34,211,238,.13))!important}
+.source-spark.is-expanded:before{content:"";position:absolute;inset:-1px;z-index:-1;border-radius:inherit;pointer-events:none;background:conic-gradient(from var(--rim-angle,0deg),rgba(34,211,238,0),rgba(103,232,249,.92),rgba(99,102,241,.62),rgba(34,211,238,0));padding:1px;opacity:.8;filter:blur(1px);animation:rimOrbit 5s linear infinite}
+.source-spark.is-expanded:after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;border-radius:inherit;background:linear-gradient(115deg,transparent 12%,rgba(125,211,252,.04) 33%,rgba(186,230,253,.26) 48%,rgba(255,255,255,.13) 51%,rgba(34,211,238,.06) 57%,transparent 76%);background-size:260% 100%;animation:deepSheen 3.8s ease-in-out infinite}
+.source-spark.is-expanded .source-hover-tip{z-index:8}
+.source-spark.is-expanded svg .mini-line{stroke:#e0fbff!important;stroke-width:4.3!important;filter:drop-shadow(0 0 4px #a5f3fc) drop-shadow(0 0 12px rgba(34,211,238,.95)) drop-shadow(0 0 26px rgba(99,102,241,.7))!important}
+@keyframes holoLaunch{0%{opacity:.82;filter:brightness(.8);transform:perspective(1000px) rotateX(0deg) rotateY(0deg) translate3d(0,0,-35px) scale(.94)}55%{filter:brightness(1.2)}100%{opacity:1;filter:brightness(1);transform:perspective(1000px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)) translate3d(0,-18px,80px) scale(1.3)}}
+@keyframes rimOrbit{to{--rim-angle:360deg}}
+@keyframes deepSheen{0%,100%{background-position:150% 0}50%{background-position:-100% 0}}
+body.light .source-spark.is-expanded{background:linear-gradient(145deg,rgba(250,253,255,.96),rgba(225,241,255,.88) 55%,rgba(240,236,255,.9))!important}
+body.light .source-spark.is-expanded svg .mini-line{stroke:#075985!important;filter:drop-shadow(0 0 4px rgba(14,165,233,.85)) drop-shadow(0 0 14px rgba(37,99,235,.4))!important}
+@media(max-width:760px){.source-spark.is-expanded{transform:perspective(850px) translate3d(0,-7px,0) scale(1.3)!important;animation:holoLaunchMobile .5s ease both}.source-spark.is-expanded svg{transform:translateZ(16px)!important}}
+@keyframes holoLaunchMobile{from{opacity:.8;transform:scale(.96)}to{opacity:1;transform:scale(1.3)}}
+@media(prefers-reduced-motion:reduce){.source-spark,.source-spark svg{transition:none!important;animation:none!important}.source-spark.is-expanded{transform:scale(1.2)!important}}
+
 </style>
 </head>
 <body>
@@ -844,7 +864,7 @@ document.addEventListener('keydown',event=>{
       box.style.setProperty('--pointer-x',((event.clientX-rect.left)/rect.width*100)+'%');
       box.style.setProperty('--pointer-y',((event.clientY-rect.top)/rect.height*100)+'%');
       const nx=((event.clientX-rect.left)/rect.width-.5)*2,ny=((event.clientY-rect.top)/rect.height-.5)*2;
-      box.style.setProperty('--tilt-x',(-ny*3)+'deg');box.style.setProperty('--tilt-y',(nx*3)+'deg');box.classList.add('is-exploring');
+      box.style.setProperty('--tilt-x',(-ny*20)+'deg');box.style.setProperty('--tilt-y',(nx*20)+'deg');box.classList.add('is-exploring');
       if(!samples.length)return;
       const chartRect=imported.getBoundingClientRect();
       const viewX=Math.max(78,Math.min(972,(event.clientX-chartRect.left)/chartRect.width*1000));
