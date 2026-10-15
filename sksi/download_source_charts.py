@@ -36,6 +36,13 @@ def svg_chart(title: str, label: str, color: str,
     low, high = min(values), max(values)
     padding = (high - low) * 0.08 if high > low else 1.0
     low, high = low - padding, high + padding
+    # Keep SVGs light enough for fast mobile loading while retaining the full
+    # date range and value range. Each plotted sample remains hoverable.
+    max_points = 800
+    stride = max(1, (len(rows) + max_points - 1) // max_points)
+    plot_rows = rows[::stride]
+    if plot_rows[-1] != rows[-1]:
+        plot_rows.append(rows[-1])
     start, end = rows[0][0], rows[-1][0]
     span = max((end - start).days, 1)
 
@@ -77,10 +84,10 @@ def svg_chart(title: str, label: str, color: str,
         xx = x(dt)
         parts.append(f'<line x1="{xx:.2f}" y1="{top}" x2="{xx:.2f}" y2="{height-bottom}" stroke="#f0f3f7" stroke-width="1"/>')
         parts.append(f'<text x="{xx:.2f}" y="{height-16}" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#53657a">{year}</text>')
-    points = " ".join(f"{x(dt):.2f},{y(value):.2f}" for dt, value in rows)
+    points = " ".join(f"{x(dt):.2f},{y(value):.2f}" for dt, value in plot_rows)
     parts.append(f'<polyline fill="none" stroke="{color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="{points}"/>')
     # Invisible but hoverable data points show the exact date and value.
-    for dt, value in rows:
+    for dt, value in plot_rows:
         parts.append(
             f'<circle cx="{x(dt):.2f}" cy="{y(value):.2f}" r="5" '
             f'fill="{color}" fill-opacity="0.001" stroke="none" pointer-events="all">'
