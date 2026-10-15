@@ -279,10 +279,10 @@ body.light .footer{border-color:rgba(50,70,100,.12);color:#68768a}
 
 
 /* Gaming-inspired chart interaction: depth, edge light and pointer-following glow */
-.interactive-chart,.source-spark{--pointer-x:50%;--pointer-y:50%;position:relative;transform-style:preserve-3d;transition:transform .24s cubic-bezier(.2,.75,.25,1),box-shadow .24s ease,border-color .24s ease,background-color .24s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 24px rgba(0,0,0,.10)}
+.interactive-chart,.source-spark{--pointer-x:50%;--pointer-y:50%;--tilt-x:.65deg;--tilt-y:-.45deg;position:relative;transform-style:preserve-3d;transition:transform .24s cubic-bezier(.2,.75,.25,1),box-shadow .24s ease,border-color .24s ease,background-color .24s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 24px rgba(0,0,0,.10)}
 .interactive-chart:before,.source-spark:before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;opacity:0;background:radial-gradient(340px circle at var(--pointer-x) var(--pointer-y),rgba(96,165,250,.14),transparent 62%);transition:opacity .22s ease}
 .interactive-chart:after,.source-spark:after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;opacity:0;background:linear-gradient(125deg,transparent 22%,rgba(255,255,255,.035) 45%,rgba(96,165,250,.07) 50%,transparent 68%);background-size:220% 220%;background-position:100% 100%;transition:opacity .25s ease,background-position .6s ease}
-.interactive-chart:hover,.source-spark:hover{transform:perspective(1100px) rotateX(.65deg) rotateY(-.45deg) translateY(-3px) scale(1.002);border-color:rgba(112,181,255,.48)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 38px rgba(0,0,0,.23),0 0 0 1px rgba(96,165,250,.07),0 0 24px rgba(59,130,246,.08)}
+.interactive-chart:hover,.source-spark:hover{transform:perspective(1100px) rotateX(var(--tilt-x,.65deg)) rotateY(var(--tilt-y,-.45deg)) translateY(-3px) scale(1.002);border-color:rgba(112,181,255,.48)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 38px rgba(0,0,0,.23),0 0 0 1px rgba(96,165,250,.07),0 0 24px rgba(59,130,246,.08)}
 .interactive-chart:hover:before,.source-spark:hover:before{opacity:1}
 .interactive-chart:hover:after,.source-spark:hover:after{opacity:1;background-position:0 0}
 .interactive-chart svg,.source-spark svg{position:relative;z-index:0}
@@ -445,9 +445,12 @@ document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click
    const rect=surface.getBoundingClientRect();
    surface.style.setProperty('--pointer-x',((event.clientX-rect.left)/rect.width*100)+'%');
    surface.style.setProperty('--pointer-y',((event.clientY-rect.top)/rect.height*100)+'%');
+   const nx=((event.clientX-rect.left)/rect.width-.5)*2,ny=((event.clientY-rect.top)/rect.height-.5)*2;
+   surface.style.setProperty('--tilt-x',(-ny*1.15)+'deg');surface.style.setProperty('--tilt-y',(nx*1.15)+'deg');
   });
   surface.addEventListener('pointerleave',()=>{
    surface.style.setProperty('--pointer-x','50%');surface.style.setProperty('--pointer-y','50%');
+   surface.style.setProperty('--tilt-x','.65deg');surface.style.setProperty('--tilt-y','-.45deg');
   });
  });
  window.addEventListener('resize',()=>{if(chartRows.length)renderChart();});
@@ -490,9 +493,14 @@ async function loadSourceCharts(){
     dot.setAttribute('pointer-events','none');dot.setAttribute('visibility','hidden');
     imported.appendChild(cross);imported.appendChild(dot);
     box.addEventListener('pointermove',event=>{
+      const rect=box.getBoundingClientRect();
+      box.style.setProperty('--pointer-x',((event.clientX-rect.left)/rect.width*100)+'%');
+      box.style.setProperty('--pointer-y',((event.clientY-rect.top)/rect.height*100)+'%');
+      const nx=((event.clientX-rect.left)/rect.width-.5)*2,ny=((event.clientY-rect.top)/rect.height-.5)*2;
+      box.style.setProperty('--tilt-x',(-ny*1.15)+'deg');box.style.setProperty('--tilt-y',(nx*1.15)+'deg');
       if(!samples.length)return;
-      const rect=imported.getBoundingClientRect();
-      const viewX=Math.max(78,Math.min(972,(event.clientX-rect.left)/rect.width*1000));
+      const chartRect=imported.getBoundingClientRect();
+      const viewX=Math.max(78,Math.min(972,(event.clientX-chartRect.left)/chartRect.width*1000));
       let nearest=samples[0],distance=Infinity;
       for(const point of samples){const dx=Math.abs(Number(point.getAttribute('cx'))-viewX);if(dx<distance){distance=dx;nearest=point;}}
       const px=Number(nearest.getAttribute('cx')),py=Number(nearest.getAttribute('cy'));
@@ -504,7 +512,7 @@ async function loadSourceCharts(){
       hoverTip.style.top=localX>boxRect.width*.68?'auto':'6px';
       hoverTip.style.bottom=hoverTip.style.top==='auto'?'6px':'auto';
     });
-    box.addEventListener('pointerleave',()=>{hoverTip.hidden=true;cross.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');});
+    box.addEventListener('pointerleave',()=>{hoverTip.hidden=true;cross.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');box.style.setProperty('--pointer-x','50%');box.style.setProperty('--pointer-y','50%');box.style.setProperty('--tilt-x','.65deg');box.style.setProperty('--tilt-y','-.45deg');});
    }catch(err){box.textContent='Chart konnte nicht geladen werden';}
   });
 }
