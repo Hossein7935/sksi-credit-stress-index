@@ -136,7 +136,7 @@ function setTheme(mode){
  if(chartRows.length)renderChart();
 }
 try{setTheme(localStorage.getItem(THEME_KEY)==='light'?'light':'dark');}catch(e){setTheme('dark');}
-\ndocument.getElementById('themeToggle').addEventListener('click',()=>setTheme(document.body.classList.contains('light')?'dark':'light'));
+document.getElementById('themeToggle').addEventListener('click',()=>setTheme(document.body.classList.contains('light')?'dark':'light'));
 document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click',()=>{chartYears=Number(btn.dataset.years);document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',b===btn));chartSelected=false;renderChart();}));
 window.addEventListener('resize',()=>{if(chartRows.length)renderChart();});
 
