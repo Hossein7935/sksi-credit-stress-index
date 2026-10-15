@@ -332,6 +332,24 @@ body.light .method-strip{background:linear-gradient(115deg,#fff,#f5f8fc);border-
 @media(max-width:760px){.intro-panel{padding:24px 21px;margin-bottom:18px;border-radius:21px}.intro-panel h2{font-size:28px}.intro-panel p{font-size:13px}.intro-tags{margin-top:16px}.method-strip{padding:15px}}
 html[dir="rtl"] .intro-panel,html[dir="rtl"] .method-strip{text-align:right}
 
+
+/* Futuristic chart stage: luminous data, glass depth, and subtle motion */
+.interactive-chart{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,rgba(37,99,235,.13),transparent 48%),linear-gradient(160deg,#0b1526 0%,#080f1b 70%,#07101c 100%)!important;border:1px solid rgba(125,180,255,.22)!important;box-shadow:inset 0 1px 0 rgba(224,240,255,.06),inset 0 -30px 70px rgba(0,0,0,.12),0 18px 45px rgba(0,0,0,.18)}
+.interactive-chart:before{background:radial-gradient(420px circle at var(--pointer-x) var(--pointer-y),rgba(69,155,255,.18),transparent 65%),linear-gradient(180deg,rgba(255,255,255,.025),transparent 24%)}
+.interactive-chart:after{background:linear-gradient(112deg,transparent 25%,rgba(117,190,255,.025) 42%,rgba(147,197,253,.11) 50%,rgba(255,255,255,.025) 53%,transparent 70%);background-size:240% 240%}
+.interactive-chart svg{filter:drop-shadow(0 8px 24px rgba(0,0,0,.12))}
+.interactive-chart svg text{font-variant-numeric:tabular-nums;letter-spacing:.015em}
+.interactive-chart:hover{box-shadow:inset 0 1px 0 rgba(224,240,255,.1),inset 0 -30px 70px rgba(0,0,0,.12),0 24px 58px rgba(0,0,0,.28),0 0 35px rgba(59,130,246,.1)!important}
+.interactive-chart:hover svg polyline{filter:drop-shadow(0 0 4px rgba(96,165,250,.7)) drop-shadow(0 0 13px rgba(59,130,246,.3))}
+.source-spark{background:radial-gradient(ellipse at 50% 0%,rgba(37,99,235,.11),transparent 58%),linear-gradient(160deg,#0b1526,#080f1b)!important;border:1px solid rgba(125,180,255,.2)!important;border-radius:13px!important;box-shadow:inset 0 1px 0 rgba(224,240,255,.05),inset 0 -18px 32px rgba(0,0,0,.1),0 8px 22px rgba(0,0,0,.08)}
+.source-spark svg{filter:drop-shadow(0 4px 12px rgba(0,0,0,.14))}
+.source-spark svg .mini-line{stroke:#75baff!important;stroke-width:2.5!important;filter:drop-shadow(0 0 3px rgba(96,165,250,.55))}
+.source-spark svg path:not([fill="none"]){filter:drop-shadow(0 2px 6px rgba(59,130,246,.12))}
+.source-spark:hover{box-shadow:inset 0 1px 0 rgba(224,240,255,.1),0 18px 38px rgba(0,0,0,.23),0 0 26px rgba(59,130,246,.1)!important}
+body.light .interactive-chart{background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,.09),transparent 48%),linear-gradient(160deg,#fff,#f2f7ff)!important;border-color:rgba(59,130,246,.22)!important;box-shadow:inset 0 1px 0 #fff,0 18px 45px rgba(37,74,130,.08)}
+body.light .source-spark{background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,.07),transparent 58%),linear-gradient(160deg,#fff,#f4f8ff)!important;border-color:rgba(59,130,246,.18)!important;box-shadow:inset 0 1px 0 #fff,0 8px 22px rgba(37,74,130,.06)}
+@media(hover:none),(prefers-reduced-motion:reduce){.interactive-chart,.source-spark{transform:none!important}.interactive-chart:after,.source-spark:after{display:none!important}}
+
 </style>
 </head>
 <body>
@@ -410,8 +428,22 @@ function renderChart(){
  for(let yr=Math.ceil(firstYear/tickStep)*tickStep;yr<=last;yr+=tickStep){let i=rows.findIndex(r=>Number(r.date.slice(0,4))>=yr);if(i<0)continue;const xx=x(i);svg.appendChild(svgEl('line',{x1:xx,y1:T,x2:xx,y2:H-B,stroke:vgrid,'stroke-width':1}));svg.appendChild(svgEl('text',{x:xx,y:H-17,fill:yearTxt,'font-size':12,'text-anchor':'middle'},String(yr)));}
  const points=rows.map((r,i)=>x(i)+','+y(r.score)).join(' ');
  const area='M '+x(0)+' '+y(0)+' L '+rows.map((r,i)=>x(i)+' '+y(r.score)).join(' L ')+' L '+x(rows.length-1)+' '+y(0)+' Z';
- svg.appendChild(svgEl('path',{d:area,fill:'#60a5fa',opacity:.09}));
- svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:'#60a5fa','stroke-width':2.4,'stroke-linejoin':'round','stroke-linecap':'round'}));
+ const defs=svgEl('defs',{});
+ const areaGrad=svgEl('linearGradient',{id:'sksiAreaGrad',x1:'0',y1:'0',x2:'0',y2:'1'});
+ areaGrad.appendChild(svgEl('stop',{offset:'0%','stop-color':'#60a5fa','stop-opacity':light?'.34':'.30'}));
+ areaGrad.appendChild(svgEl('stop',{offset:'55%','stop-color':'#3b82f6','stop-opacity':light?'.12':'.13'}));
+ areaGrad.appendChild(svgEl('stop',{offset:'100%','stop-color':'#0ea5e9','stop-opacity':'0'}));
+ defs.appendChild(areaGrad);
+ const glow=svgEl('filter',{id:'sksiLineGlow',x:'-30%',y:'-30%',width:'160%',height:'160%'});
+ glow.appendChild(svgEl('feGaussianBlur',{stdDeviation:'3.5',result:'blur'}));
+ defs.appendChild(glow);
+ svg.appendChild(defs);
+ svg.appendChild(svgEl('path',{d:area,fill:'url(#sksiAreaGrad)',opacity:1}));
+ svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:'#3b82f6','stroke-width':8,'stroke-linejoin':'round','stroke-linecap':'round',opacity:light?'.14':'.22',filter:'url(#sksiLineGlow)'}));
+ svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:light?'#1d64c8':'#60a5fa','stroke-width':2.6,'stroke-linejoin':'round','stroke-linecap':'round'}));
+ const lastPoint=rows[rows.length-1];
+ svg.appendChild(svgEl('circle',{cx:x(rows.length-1),cy:y(lastPoint.score),r:10,fill:'#60a5fa',opacity:'.13'}));
+ svg.appendChild(svgEl('circle',{cx:x(rows.length-1),cy:y(lastPoint.score),r:4.2,fill:light?'#1d64c8':'#dbeafe',stroke:'#60a5fa','stroke-width':2}));
  const cross=svgEl('g',{id:'crosshair',visibility:'hidden'});
  cross.appendChild(svgEl('line',{id:'crossV',x1:L,y1:T,x2:L,y2:H-B,stroke:crossColor,'stroke-width':1,'stroke-dasharray':'4 4',opacity:.8}));
  cross.appendChild(svgEl('line',{id:'crossH',x1:L,y1:T,x2:W-R,y2:T,stroke:'#e6eef9','stroke-width':1,'stroke-dasharray':'4 4',opacity:.55}));
