@@ -1,0 +1,48 @@
+{
+  "sample": "weekly NFCI dates 1997-01-03 through 2006-12-31",
+  "method": "median and 1.4826*MAD, with a floor so a calm window cannot explode the z-score",
+  "components": {
+    "hy": {
+      "median": 4.74,
+      "scale": 2.290617,
+      "fred": "BAMLH0A0HYM2",
+      "role": "High-yield option-adjusted spread, percent"
+    },
+    "ig": {
+      "median": 1.065,
+      "scale": 0.37065,
+      "fred": "BAMLC0A0CM",
+      "role": "Investment-grade option-adjusted spread, percent"
+    },
+    "def": {
+      "median": 0.8200000000000003,
+      "scale": 0.17791200000000082,
+      "fred": "DBAA minus DAAA",
+      "role": "Moody's Baa-Aaa yield spread, percent, public stand-in for perceived default risk"
+    },
+    "nfci": {
+      "median": -0.5595000000000001,
+      "scale": 0.20089229999999997,
+      "fred": "NFCI",
+      "role": "Chicago Fed National Financial Conditions Index"
+    }
+  },
+  "weights": {
+    "hy": 0.3,
+    "ig": 0.25,
+    "def": 0.25,
+    "nfci": 0.2
+  },
+  "mix": {
+    "level": 0.7,
+    "sync": 0.2,
+    "accel": 0.1
+  },
+  "quorum_z": 0.75,
+  "raw_median": 0.11082968586460572,
+  "thresholds": {
+    "watch": 0.890528635457306,
+    "stress": 1.4397078892875395,
+    "severe": 1.9554279179717966
+  }
+}
