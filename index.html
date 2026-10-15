@@ -350,9 +350,58 @@ body.light .interactive-chart{background:radial-gradient(ellipse at 50% 0%,rgba(
 body.light .source-spark{background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,.07),transparent 58%),linear-gradient(160deg,#fff,#f4f8ff)!important;border-color:rgba(59,130,246,.18)!important;box-shadow:inset 0 1px 0 #fff,0 8px 22px rgba(37,74,130,.06)}
 @media(hover:none),(prefers-reduced-motion:reduce){.interactive-chart,.source-spark{transform:none!important}.interactive-chart:after,.source-spark:after{display:none!important}}
 
+
+/* Scroll experience: cinematic chapters, depth, and restrained motion */
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{background-color:#070b14;background-image:radial-gradient(ellipse at 50% -12%,rgba(36,103,190,.2),transparent 48%),radial-gradient(ellipse at 95% 38%,rgba(12,148,155,.075),transparent 28%),linear-gradient(rgba(92,145,206,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(92,145,206,.025) 1px,transparent 1px);background-size:auto,auto,48px 48px,48px 48px;background-attachment:fixed}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 12% 48%,rgba(28,85,160,.08),transparent 38%);opacity:.9}
+#scrollProgress{position:fixed;z-index:1000;left:0;top:0;width:100%;height:3px;background:rgba(120,160,210,.08);pointer-events:none}
+#scrollProgress span{display:block;width:0;height:100%;background:linear-gradient(90deg,#3b82f6,#67e8f9,#a5f3fc);box-shadow:0 0 12px rgba(56,189,248,.65);transform-origin:left;transition:width .08s linear}
+.scroll-rail{position:fixed;z-index:30;right:max(12px,calc((100vw - 1450px)/2));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;padding:11px 8px;border:1px solid rgba(130,170,220,.15);border-radius:999px;background:rgba(7,13,23,.58);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.scroll-rail button{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:#60738d;opacity:.65;cursor:pointer;transition:transform .22s ease,background .22s ease,box-shadow .22s ease}
+.scroll-rail button[aria-current="step"]{background:#8bc8ff;opacity:1;transform:scale(1.55);box-shadow:0 0 12px rgba(96,165,250,.8)}
+.scroll-rail button:focus-visible{outline:2px solid #8bc8ff;outline-offset:4px}
+.intro-panel{min-height:clamp(270px,31vw,350px);display:flex;flex-direction:column;justify-content:center;padding:clamp(27px,4vw,46px);border-radius:28px;background:radial-gradient(ellipse at 78% 25%,rgba(45,117,231,.18),transparent 38%),linear-gradient(135deg,rgba(15,27,46,.95),rgba(7,14,25,.92));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 30px 90px rgba(0,0,0,.16)}
+.intro-panel h2{max-width:850px;font-size:clamp(32px,5vw,56px);letter-spacing:-.065em;line-height:1.04;text-wrap:balance}
+.intro-panel p{font-size:clamp(14px,1.3vw,16px);max-width:680px;line-height:1.9}
+.intro-kicker{display:flex;align-items:center;gap:10px}
+.intro-kicker:before{content:"";display:inline-block;width:24px;height:1px;background:#7dd3fc;box-shadow:0 0 10px #38bdf8}
+.intro-tags span{background:rgba(7,15,28,.42);padding:8px 12px}
+.intro-panel,.hero,.section,.method-strip,.footer{transition:opacity .65s ease,transform .65s cubic-bezier(.2,.75,.25,1),filter .65s ease}
+.js-scroll .intro-panel:not(.in-view),.js-scroll .hero:not(.in-view),.js-scroll .section:not(.in-view),.js-scroll .method-strip:not(.in-view),.js-scroll .footer:not(.in-view){opacity:.25;filter:blur(1.5px);transform:translateY(26px) scale(.99)}
+.js-scroll .intro-panel.in-view,.js-scroll .hero.in-view,.js-scroll .section.in-view,.js-scroll .method-strip.in-view,.js-scroll .footer.in-view{opacity:1;filter:none;transform:translateY(0) scale(1)}
+.hero{position:relative;gap:20px}
+.hero>.panel,.component,.chartbox,.method-strip{transition:transform .35s cubic-bezier(.2,.75,.25,1),border-color .35s ease,box-shadow .35s ease}
+.hero>.panel{border-radius:24px}
+.sectionhead{padding-bottom:12px;border-bottom:1px solid rgba(130,170,220,.11)}
+.sectionhead h2{font-size:clamp(19px,2vw,24px);letter-spacing:-.045em}
+.components{gap:14px}
+.component{border-radius:18px;background:linear-gradient(150deg,rgba(16,29,48,.95),rgba(9,17,29,.96));box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 10px 30px rgba(0,0,0,.08)}
+.component:hover{transform:translateY(-5px) perspective(700px) rotateX(1deg);border-color:rgba(115,181,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 18px 35px rgba(0,0,0,.18),0 0 24px rgba(59,130,246,.06)}
+.chartbox{padding:clamp(17px,3vw,30px);border-radius:26px;background:linear-gradient(145deg,rgba(13,23,39,.97),rgba(7,13,23,.98));box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 28px 70px rgba(0,0,0,.2)}
+.note{font-size:12px;line-height:1.85;max-width:100ch}
+.method-strip{padding:24px;border-radius:20px}
+.footer{padding-top:18px;border-top:1px solid rgba(130,170,220,.12);line-height:1.9}
+.scroll-cue{display:flex;align-items:center;gap:10px;margin-top:22px;color:#9eb5d2;font-size:10px;font-weight:750;letter-spacing:.16em;text-transform:uppercase}
+.scroll-cue .cue-line{height:1px;width:38px;background:linear-gradient(90deg,#60a5fa,transparent)}
+.scroll-cue .cue-arrow{display:inline-grid;place-items:center;width:25px;height:25px;border:1px solid rgba(125,180,255,.3);border-radius:50%;color:#a5d4ff;font-size:15px;animation:cueFloat 1.8s ease-in-out infinite}
+@keyframes cueFloat{0%,100%{transform:translateY(0);box-shadow:0 0 0 rgba(59,130,246,0)}50%{transform:translateY(4px);box-shadow:0 4px 18px rgba(59,130,246,.16)}}
+body.light{background-image:radial-gradient(ellipse at 50% -12%,rgba(59,130,246,.13),transparent 48%),linear-gradient(rgba(60,100,160,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(60,100,160,.025) 1px,transparent 1px);background-size:auto,48px 48px,48px 48px;background-attachment:fixed}
+body.light .scroll-rail{background:rgba(255,255,255,.7);border-color:rgba(70,100,145,.17)}
+body.light .intro-panel{background:radial-gradient(ellipse at 78% 25%,rgba(59,130,246,.1),transparent 38%),linear-gradient(135deg,#fff,#f3f7fd);box-shadow:inset 0 1px 0 #fff,0 25px 70px rgba(37,74,130,.08)}
+body.light .intro-tags span{background:rgba(255,255,255,.75)}
+body.light .component{background:linear-gradient(150deg,#fff,#f7faff)}
+body.light .chartbox{background:linear-gradient(145deg,#fff,#f6f9fe);box-shadow:inset 0 1px 0 #fff,0 28px 70px rgba(37,74,130,.08)}
+body.light .scroll-cue{color:#60738e}
+@media(max-width:760px){.scroll-rail{right:5px;gap:9px;padding:9px 6px;opacity:.82}.intro-panel{min-height:300px;padding:25px 21px;border-radius:23px}.intro-panel h2{font-size:clamp(30px,8vw,39px)}.scroll-cue{margin-top:18px}.components{gap:9px}.component:hover{transform:none}.hero>.panel{border-radius:20px}.footer{padding-right:12px}}
+@media(hover:none){.js-scroll .intro-panel:not(.in-view),.js-scroll .hero:not(.in-view),.js-scroll .section:not(.in-view),.js-scroll .method-strip:not(.in-view),.js-scroll .footer:not(.in-view){filter:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.intro-panel,.hero,.section,.method-strip,.footer,.component,.hero>.panel,.chartbox{transition:none!important}.scroll-cue .cue-arrow{animation:none}.js-scroll .intro-panel:not(.in-view),.js-scroll .hero:not(.in-view),.js-scroll .section:not(.in-view),.js-scroll .method-strip:not(.in-view),.js-scroll .footer:not(.in-view){opacity:1;transform:none;filter:none}}
+
 </style>
 </head>
 <body>
+<div id="scrollProgress" aria-hidden="true"><span></span></div>
+<nav class="scroll-rail" id="scrollRail" aria-label="Seitenabschnitte"><button type="button" data-target="introTitle" aria-label="Einführung" aria-current="step"></button><button type="button" data-target="score" aria-label="Aktueller Wochenwert"></button><button type="button" data-target="components" aria-label="Vier Marktsignale"></button><button type="button" data-target="mainChart" aria-label="Historischer Verlauf"></button><button type="button" data-target="methodTitle" aria-label="Methodik"></button></nav>
 <main>
 <header class="top">
   <div class="brand"><div class="logo">SK</div><div><div class="eyebrow" id="brandKicker">CREDIT MARKET INTELLIGENCE</div><h1 id="brandTitle">SKSI · Credit Stress Index</h1><p class="subtitle">Synchronisierter Kreditstress-Index · USA</p></div></div>
@@ -363,7 +412,7 @@ body.light .source-spark{background:radial-gradient(ellipse at 50% 0%,rgba(59,13
   <div class="intro-kicker" id="introKicker">WEEKLY CREDIT MARKET BRIEF</div>
   <h2 id="introTitle">Kreditstress erkennen. Märkte besser einordnen.</h2>
   <p id="introText">Der SKSI bündelt vier Signale aus dem US-Kreditmarkt zu einem wöchentlichen Gesamtbild. Verfolge, wie sich die Kreditbedingungen verändern – vom ruhigen Markt bis zu Phasen erhöhter Anspannung.</p>
-  <div class="intro-tags"><span id="introTag1">Wöchentlich aktualisiert</span><span id="introTag2">Historie seit 1997</span><span id="introTag3">Vier Marktsignale</span></div>
+  <div class="intro-tags"><span id="introTag1">Wöchentlich aktualisiert</span><span id="introTag2">Historie seit 1997</span><span id="introTag3">Vier Marktsignale</span></div><div class="scroll-cue" id="scrollCue"><span class="cue-line"></span><span id="scrollCueText">WEITER ENTDECKEN</span><span class="cue-arrow" aria-hidden="true">↓</span></div>
 </section>
 <section class="hero">
   <article class="panel">
@@ -625,5 +674,27 @@ async function loadData(){
 applyLanguage(document.getElementById('languageSelect').value||'de');
 $('refresh').addEventListener('click',loadData);loadData().then(()=>{applyLanguage(currentLang);loadSourceCharts();});loadChart();
 </script>
+
+<script>
+(function(){
+ const body=document.body,progress=document.querySelector('#scrollProgress span'),rail=document.getElementById('scrollRail');
+ const steps=[document.querySelector('.intro-panel'),document.querySelector('.hero'),document.getElementById('components'),document.getElementById('mainChart'),document.querySelector('.method-strip'),document.querySelector('.footer')].filter(Boolean);
+ const buttons=[...rail.querySelectorAll('button')];
+ buttons.forEach(btn=>btn.addEventListener('click',()=>{const target=document.getElementById(btn.dataset.target);if(target)target.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});}));
+ const cueText={de:'WEITER ENTDECKEN',en:'SCROLL TO EXPLORE',es:'SIGUE EXPLORANDO',ar:'تابع الاستكشاف'};
+ function updateLanguageCue(){const select=document.getElementById('languageSelect');const lang=select?select.value:'de';const el=document.getElementById('scrollCueText');if(el)el.textContent=cueText[lang]||cueText.de;rail.setAttribute('aria-label',({de:'Seitenabschnitte',en:'Page sections',es:'Secciones de la página',ar:'أقسام الصفحة'})[lang]||cueText.de);}
+ updateLanguageCue();const ls=document.getElementById('languageSelect');if(ls)ls.addEventListener('change',updateLanguageCue);
+ function updateProgress(){const doc=document.documentElement,range=doc.scrollHeight-innerHeight,p=range>0?Math.max(0,Math.min(100,scrollY/range*100)):0;progress.style.width=p+'%';}
+ updateProgress();addEventListener('scroll',updateProgress,{passive:true});addEventListener('resize',updateProgress);
+ if('IntersectionObserver'in window&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  body.classList.add('js-scroll');
+  const reveal=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('in-view');}),{threshold:.08,rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('.intro-panel,.hero,.section,.method-strip,.footer').forEach(el=>reveal.observe(el));
+  const active=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;const idx=id==='components'?2:id==='mainChart'?3:id==='score'||id==='regime'?1:id==='methodTitle'?4:id==='introTitle'?0:0;buttons.forEach((b,i)=>{const on=i===idx;b.setAttribute('aria-current',on?'step':'false');});}}),{threshold:.3,rootMargin:'-20% 0px -35% 0px'});
+  [document.getElementById('introTitle'),document.getElementById('score'),document.getElementById('components'),document.getElementById('mainChart'),document.getElementById('methodTitle')].filter(Boolean).forEach(el=>active.observe(el));
+ }else document.querySelectorAll('.intro-panel,.hero,.section,.method-strip,.footer').forEach(el=>el.classList.add('in-view'));
+})();
+</script>
+
 </body>
 </html>
