@@ -665,7 +665,7 @@ function showChartPoint(i,cx,cy,lock){
  if(lock){chartSelected=true;window.setTimeout(()=>{chartSelected=false;},5000);}
 }
 async function loadChart(){
- try{const r=await fetch(CSV_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('CSV HTTP '+r.status);const csv=await r.text();chartRows=csv.trim().split(/\r?\n/).slice(1).map(line=>{const p=line.split(',');return {date:p[0],score:Number(p[1]),regime:p[2],quorum:p[3]};}).filter(r=>r.date&&Number.isFinite(r.score));renderChart();}
+ try{const r=await fetch(CSV_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('CSV HTTP '+r.status);const csv=await r.text();chartRows=csv.trim().split(/\r?\n/).slice(1).map(line=>{const p=line.split(',');return {date:p[0],score:Number(p[1]),regime:p[2],quorum:p[3]};}).filter(r=>r.date&&Number.isFinite(r.score));renderChart();updateWeeklyDelta();}
  catch(e){$('historyChart').replaceChildren(svgEl('text',{x:500,y:175,fill:'#fda4af','text-anchor':'middle','font-size':15},tr('chartfailed')));$('loadError').textContent=tr('charterror')+e.message;}
 }
 
@@ -701,6 +701,15 @@ function applyLanguage(lang){
  $('brandTitle').textContent=({de:'SKSI · Kreditstress-Index',en:'SKSI · Credit Stress Index',es:'SKSI · Índice de estrés crediticio',ar:'SKSI · مؤشر ضغوط الائتمان'})[currentLang];
  $('introKicker').textContent=({de:'WÖCHENTLICHER KREDITMARKT-BRIEF',en:'WEEKLY CREDIT MARKET BRIEF',es:'INFORME SEMANAL DEL MERCADO DE CRÉDITO',ar:'موجز أسبوعي لسوق الائتمان'})[currentLang];
  $('introTitle').textContent=d.introTitle;$('introText').textContent=d.introText;$('introTag1').textContent=d.introTag1;$('introTag2').textContent=d.introTag2;$('introTag3').textContent=d.introTag3;
+  const exploreCopy={
+   de:['DEIN ANALYSEPFAD','Entdecke die Signale in deinem Tempo','Wähle einen Einstieg – du behältst die Kontrolle.','Aktuelle Lage','Was sagt der Wert?','Vier Signale','Was bewegt den Index?','Historie erkunden','Vergleiche frühere Phasen','Veränderung zur Vorwoche','Vergleich mit dem vorherigen Wochenwert','gestiegen','gesunken','unverändert'],
+   en:['YOUR EXPLORATION PATH','Explore the signals at your own pace','Choose where to begin—you stay in control.','Current picture','What does the reading say?','Four signals','What moves the index?','Explore history','Compare earlier periods','Change vs. previous week','Compared with the previous weekly reading','up','down','unchanged'],
+   es:['TU RUTA DE ANÁLISIS','Explora las señales a tu ritmo','Elige por dónde empezar; tú tienes el control.','Situación actual','¿Qué indica el valor?','Cuatro señales','¿Qué mueve el índice?','Explorar historial','Compara períodos anteriores','Cambio frente a la semana anterior','Comparado con la lectura semanal anterior','subió','bajó','sin cambios'],
+   ar:['مسار الاستكشاف','استكشف المؤشرات بالسرعة التي تناسبك','اختر نقطة البداية؛ أنت تتحكم بالتجربة.','الوضع الحالي','ماذا تعني القراءة؟','أربع إشارات','ما الذي يحرك المؤشر؟','استكشف السجل','قارن الفترات السابقة','التغير عن الأسبوع السابق','مقارنة بالقراءة الأسبوعية السابقة','ارتفع','انخفض','دون تغيير']
+  }[currentLang];
+  ['exploreKicker','exploreTitle','exploreSubtitle','exploreOne','exploreOneSub','exploreTwo','exploreTwoSub','exploreThree','exploreThreeSub','trendLabel','trendHint'].forEach((id,i)=>{const el=$(id);if(el&&exploreCopy[i]!==undefined)el.textContent=exploreCopy[i];});
+  const pathNav=document.getElementById('explorePath');if(pathNav)pathNav.setAttribute('aria-label',exploreCopy[0]);
+  if(chartRows.length)updateWeeklyDelta();
  $('signalsLead').textContent=d.signalsLead;$('historyLead').textContent=d.historyLead;$('methodLead').textContent=d.methodLead;
  $('methodTitle').textContent=({de:'Daten mit Kontext lesen',en:'Read the data in context',es:'Interpreta los datos en contexto',ar:'اقرأ البيانات ضمن سياقها'})[currentLang];
  document.querySelector('.hero .eyebrow').textContent=d.current;$('regimeText').textContent=d.regime;document.querySelectorAll('.ticks span').forEach((e,i)=>e.textContent=d.ticks[i]);
@@ -726,6 +735,11 @@ document.getElementById('themeToggle').addEventListener('click',()=>setTheme(doc
 document.getElementById('languageSelect').addEventListener('change',e=>applyLanguage(e.target.value));
 try{document.getElementById('languageSelect').value=localStorage.getItem(LANG_KEY)||'de'}catch(e){}
 document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click',()=>{chartYears=Number(btn.dataset.years);document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',b===btn));chartSelected=false;renderChart();}));
+ document.querySelectorAll('[data-explore]').forEach(btn=>btn.addEventListener('click',()=>{
+  const id=btn.dataset.explore,target=id==='score'?document.getElementById('score'):document.getElementById(id);
+  if(target)target.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:id==='score'?'center':'start'});
+  document.querySelectorAll('[data-explore]').forEach(b=>b.setAttribute('aria-current',b===btn?'step':'false'));
+ }));
 // Pointer-following light for subtle 3D chart interaction.
  document.querySelectorAll('.interactive-chart,.source-spark').forEach(surface=>{
   surface.addEventListener('pointermove',event=>{
@@ -744,6 +758,17 @@ document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click
 
 const DATA_URL='https://raw.githubusercontent.com/Hossein7935/sksi-credit-stress-index/main/data/latest.json';
 const CSV_URL='https://raw.githubusercontent.com/Hossein7935/sksi-credit-stress-index/main/data/sksi_weekly.csv';
+function updateWeeklyDelta(){
+ const el=document.getElementById('weeklyDelta');if(!el||chartRows.length<2)return;
+ const a=chartRows[chartRows.length-2],b=chartRows[chartRows.length-1],delta=Number(b.score)-Number(a.score);
+ if(!Number.isFinite(delta))return;
+ const words={de:['gestiegen','gesunken','unverändert'],en:['up','down','unchanged'],es:['subió','bajó','sin cambios'],ar:['ارتفع','انخفض','دون تغيير']}[currentLang]||['gestiegen','gesunken','unverändert'];
+ const trend=delta>.005?0:delta<-.005?1:2;
+ el.className='delta-value '+(trend===0?'up':trend===1?'down':'flat');el.replaceChildren();
+ const arrow=document.createElement('span');arrow.className='delta-arrow';arrow.textContent=trend===0?'↑':trend===1?'↓':'→';el.appendChild(arrow);
+ const value=document.createElement('span');value.textContent=(delta>0?'+':'')+fmt(delta,2);el.appendChild(value);
+ el.setAttribute('aria-label',words[trend]+' '+fmt(Math.abs(delta),2)+' Punkte');
+}
 const $=id=>document.getElementById(id);
 const fmt=(n,d=2)=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
 function regimeInfo(regime){return ({normal:{label:'RUHIG',color:'#4ade80',bg:'#183b2b'},watch:{label:'ERHÖHT',color:'#facc15',bg:'#463915'},stress:{label:'STRESS',color:'#fb923c',bg:'#482719'},severe:{label:'SCHWERER STRESS',color:'#fb7185',bg:'#4a1d2a'}})[regime]||{label:String(regime||'UNBEKANNT').toUpperCase(),color:'#9aabc2',bg:'#25344a'};}
@@ -849,7 +874,7 @@ $('refresh').addEventListener('click',loadData);loadData().then(()=>{applyLangua
   body.classList.add('js-scroll');
   const reveal=new IntersectionObserver(entries=>entries.forEach(entry=>{entry.target.classList.toggle('in-view',entry.isIntersecting);}),{threshold:.08,rootMargin:'0px 0px -6% 0px'});
   document.querySelectorAll('.intro-panel,.hero,.section,.method-strip,.footer').forEach(el=>reveal.observe(el));
-  const active=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;const idx=id==='components'?2:id==='mainChart'?3:id==='score'||id==='regime'?1:id==='methodTitle'?4:id==='introTitle'?0:0;buttons.forEach((b,i)=>{const on=i===idx;b.setAttribute('aria-current',on?'step':'false');});}}),{threshold:.3,rootMargin:'-20% 0px -35% 0px'});
+  const active=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;const idx=id==='components'?2:id==='mainChart'?3:id==='score'||id==='regime'?1:id==='methodTitle'?4:id==='introTitle'?0:0;buttons.forEach((b,i)=>{const on=i===idx;b.setAttribute('aria-current',on?'step':'false');});document.querySelectorAll('[data-explore]').forEach((b,i)=>b.setAttribute('aria-current',i===Math.max(0,idx-1)&&i<3?'step':'false'));}}),{threshold:.3,rootMargin:'-20% 0px -35% 0px'});
   [document.getElementById('introTitle'),document.getElementById('score'),document.getElementById('components'),document.getElementById('mainChart'),document.getElementById('methodTitle')].filter(Boolean).forEach(el=>active.observe(el));
  }else document.querySelectorAll('.intro-panel,.hero,.section,.method-strip,.footer').forEach(el=>el.classList.add('in-view'));
 })();
