@@ -165,7 +165,6 @@ try{setTheme(localStorage.getItem(THEME_KEY)==='light'?'light':'dark');}catch(e)
 document.getElementById('themeToggle').addEventListener('click',()=>setTheme(document.body.classList.contains('light')?'dark':'light'));
 document.getElementById('languageSelect').addEventListener('change',e=>applyLanguage(e.target.value));
 try{document.getElementById('languageSelect').value=localStorage.getItem(LANG_KEY)||'de'}catch(e){}
-applyLanguage(document.getElementById('languageSelect').value||'de');
 document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click',()=>{chartYears=Number(btn.dataset.years);document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',b===btn));chartSelected=false;renderChart();}));
 window.addEventListener('resize',()=>{if(chartRows.length)renderChart();});
 
@@ -196,6 +195,7 @@ async function loadData(){
   }catch(e){$('updated').textContent=tr('failed');$('loadError').textContent=tr('error')+e.message+tr('retry');}
   finally{$('refresh').disabled=false;}
 }
+applyLanguage(document.getElementById('languageSelect').value||'de');
 $('refresh').addEventListener('click',loadData);loadData().then(()=>applyLanguage(currentLang));loadChart();
 </script>
 </body>
