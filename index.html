@@ -236,7 +236,7 @@ async function loadData(){
   finally{$('refresh').disabled=false;}
 }
 applyLanguage(document.getElementById('languageSelect').value||'de');
-$('refresh').addEventListener('click',loadData);loadData().then(()=>applyLanguage(currentLang));loadSourceCharts();loadChart();
+$('refresh').addEventListener('click',loadData);loadData().then(()=>{applyLanguage(currentLang);loadSourceCharts();});loadChart();
 </script>
 </body>
 </html>
