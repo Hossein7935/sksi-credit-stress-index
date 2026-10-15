@@ -26,10 +26,10 @@ body.light .interactive-chart{background:#fff}
 body.light .range-btn{background:#f8fafc;color:#53657d}
 body.light .range-btn.active,body.light .range-btn:hover{background:#eaf2ff;color:#1d4ed8}
 .theme-toggle{white-space:nowrap}
-.source-spark{display:block;width:100%;height:74px;object-fit:contain;object-position:center;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:10px}
+.source-spark{display:block;width:100%;height:140px;object-fit:contain;object-position:center;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:10px}
 .source-hint{display:block;color:var(--blue);font-size:11px;margin-top:8px}
 .component-link{overflow:hidden}
-@media(max-width:760px){.source-spark{height:65px}}
+@media(max-width:760px){.source-spark{height:110px}}
 
 </style>
 </head>
@@ -161,7 +161,7 @@ async function loadData(){
     const units={hy:'%',ig:'%',def:'Prozentpunkte',nfci:'Indexpunkte'};
     $('components').innerHTML=Object.entries(d.components||{}).map(([key,c])=>{
       const color=stateInfo(c.state);const val=Number(c.value);
-      const source=SOURCES[key];return '<a class="component component-link" href="'+(source?source.url:'#')+'" target="_blank" rel="noreferrer" aria-label="Quelle öffnen: '+(names[key]||c.name||key)+'"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+(c.state||'unbekannt')+'</div><div class="zscore">z-Wert: '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div>'+(source?'<img class="source-spark" loading="lazy" src="'+source.chart+'" alt="Mini-Chart: '+(names[key]||c.name||key)+'" onerror="this.style.display=\'none\'"><span class="source-hint">'+source.label+'</span>':'')+'</a>';
+      const source=SOURCES[key];return '<div class="component"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+(c.state||'unbekannt')+'</div><div class="zscore">z-Wert: '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div>'+(source?'<img class="source-spark" loading="lazy" src="'+source.chart+'&t='+Date.now()+'" alt="Chart: '+(names[key]||c.name||key)+'" onerror="this.alt=\'Chart konnte nicht geladen werden\';this.style.display=\'none\'"><a class="source-link" href="'+source.url+'" target="_blank" rel="noreferrer">Quelle öffnen ↗</a>':'')+'</div>';
     }).join('');
     $('updated').textContent='Datenstand: '+(d.date?d.date.split('-').reverse().join('.'): 'unbekannt')+' · erfolgreich geladen';
   }catch(e){$('updated').textContent='Daten konnten nicht geladen werden.';$('loadError').textContent='Fehler: '+e.message+' · Bitte erneut versuchen.';}
