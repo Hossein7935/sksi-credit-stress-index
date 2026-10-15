@@ -137,6 +137,19 @@ es:{code:'Código fuente ↗',refresh:'↻ Actualizar',light:'☀ Claro',dark:'�
 ar:{code:'الكود المصدري ↗',refresh:'↻ تحديث',light:'☀ فاتح',dark:'☾ داكن',loading:'جارٍ تحميل أحدث البيانات …',current:'القيمة الأسبوعية الحالية',regime:'جارٍ تحميل البيانات',ticks:['0 · هادئ','48 · مرتفع','68 · ضغط','84 · حاد','100'],summary:'جارٍ تحميل القراءة الأخيرة.',quorum:'الإجماع — ارتفاع المؤشرات الأربعة',combined:'إشارة ضغط مجمعة',last:'أحدث أسبوع متاح',datehint:'تاريخ البيانات وليس تاريخ زيارة الصفحة',base:'خط أساس النموذج',cal:'المعايرة ثابتة',signals:'مؤشرات الضغط الأربعة',hint:'قيم السوق والابتعاد عن المستوى الطبيعي',history:'السجل التاريخي للمؤشر منذ 1997',range:'اختر الفترة',max:'الكل',legend:['قيمة SKSI','ارتفاع من 48','ضغط من 68','ضغط حاد من 84'],note:'حرّك المؤشر فوق الخط أو المس الرسم لعرض التاريخ والقيمة. اختر 5 سنوات أو 10 سنوات أو الكل لتغيير الفترة. البيانات التاريخية لا تمثل توقعاً مؤكداً.',source:'فتح المصدر ↗',footer:'المصادر: ICE BofA OAS وعوائد سندات الشركات من Moody’s ومؤشر NFCI لبنك شيكاغو الفيدرالي عبر FRED.',method:'المنهجية والحدود ↗',disclaimer:'ليس نصيحة استثمارية.',normal:'هادئ',watch:'مرتفع',stress:'ضغط',severe:'ضغط حاد',yes:'نعم · إشارة تحذير',no:'لا · لا يوجد إجماع',yesdetail:'المؤشرات الأربعة مرتفعة في الوقت نفسه.',nodetail:'ليست جميع المؤشرات مرتفعة في الوقت نفسه.',failed:'تعذر تحميل البيانات.',chartfailed:'تعذر تحميل البيانات التاريخية.',error:'خطأ: ',retry:' · يرجى المحاولة مجدداً.',updated:'البيانات حتى: ',success:' · تم التحميل بنجاح',charterror:'خطأ في الرسم: ',z:'درجة z:'}
 };
 let currentLang='de';function tr(k){return (LANG[currentLang]||LANG.de)[k]||LANG.de[k]||k;}
+function translatedSummary(regime){
+ const t={
+ de:{normal:'Ruhig. Die Kreditaufschläge liegen unter ihrem normalen Niveau von 1997–2006, und es gibt kein Quorum für Stress.',watch:'Erhöhte Anspannung am Kreditmarkt.',stress:'Deutlich erhöhter Kreditstress.',severe:'Schwerer Kreditstress.'},
+ en:{normal:'Calm. Credit spreads are below their 1997–2006 normal level, and there is no stress quorum.',watch:'Elevated tension in credit markets.',stress:'Credit stress is significantly elevated.',severe:'Severe credit stress.'},
+ es:{normal:'Calma. Los diferenciales de crédito están por debajo de su nivel normal de 1997–2006 y no hay quórum de estrés.',watch:'Tensión elevada en los mercados de crédito.',stress:'El estrés crediticio está claramente elevado.',severe:'Estrés crediticio grave.'},
+ ar:{normal:'هدوء. فروق الائتمان أقل من مستواها الطبيعي للفترة 1997–2006، ولا يوجد إجماع على وجود ضغط.',watch:'توتر مرتفع في أسواق الائتمان.',stress:'ضغط الائتمان مرتفع بوضوح.',severe:'ضغط ائتماني حاد.'}
+ };return (t[currentLang]||t.de)[regime]||(t[currentLang]||t.de).normal;
+}
+function translatedState(state){
+ const key=String(state||'normal').toLowerCase();
+ const dict={de:{niedrig:'Niedrig',normal:'Normal',erhöht:'Erhöht',hoch:'Hoch',stress:'Stress'},en:{niedrig:'Low',normal:'Normal',erhöht:'Elevated',hoch:'High',stress:'Stress'},es:{niedrig:'Bajo',normal:'Normal',erhöht:'Elevado',hoch:'Alto',stress:'Estrés'},ar:{niedrig:'منخفض',normal:'طبيعي',erhöht:'مرتفع',hoch:'عالٍ',stress:'ضغط'}};
+ return (dict[currentLang]||dict.de)[key]||state||'—';
+}
 function applyLanguage(lang){
  currentLang=LANG[lang]?lang:'de';try{localStorage.setItem(LANG_KEY,currentLang)}catch(e){}
  document.documentElement.lang=currentLang;document.documentElement.dir=currentLang==='ar'?'rtl':'ltr';const d=LANG[currentLang];
@@ -182,14 +195,14 @@ async function loadData(){
     $('score').textContent=fmt(d.score,1);$('date').textContent=d.date?d.date.split('-').reverse().join('.'): '—';
     const info=regimeInfo(d.regime);info.label=tr(['normal','watch','stress','severe'].includes(d.regime)?d.regime:'normal');$('regime').style.color=info.color;$('regime').style.background=info.bg;$('regimeText').textContent=info.label;
     $('needle').style.left=Math.max(0,Math.min(100,Number(d.score)||0))+'%';
-    $('summary').textContent=d.summary||'Kein Kurzbericht verfügbar.';
+    $('summary').textContent=translatedSummary(d.regime);
     $('quorum').textContent=d.quorum?tr('yes'):tr('no');$('quorum').style.color=d.quorum?'#fb7185':'#4ade80';
     $('quorumDetail').textContent=d.quorum?tr('yesdetail'):tr('nodetail');
     const names={hy:'High-Yield-OAS',ig:'Investment-Grade-OAS',def:'Ausfallprämie (Baa − Aaa)',nfci:'Chicago Fed NFCI'};
     const units={hy:'%',ig:'%',def:'Prozentpunkte',nfci:'Indexpunkte'};
     $('components').innerHTML=Object.entries(d.components||{}).map(([key,c])=>{
       const color=stateInfo(c.state);const val=Number(c.value);
-      const source=SOURCES[key];return '<div class="component"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+(c.state||'unbekannt')+'</div><div class="zscore">z-Wert: '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div>'+(source?'<img class="source-spark" loading="lazy" src="'+source.chart+'&t='+Date.now()+'" alt="Chart: '+(names[key]||c.name||key)+'" onerror="this.alt=\'Chart konnte nicht geladen werden\';this.style.display=\'none\'"><a class="source-link" href="'+source.url+'" target="_blank" rel="noreferrer">Quelle öffnen ↗</a>':'')+'</div>';
+      const source=SOURCES[key];return '<div class="component"><div class="cname">'+(names[key]||c.name||key)+'</div><div class="value">'+(Number.isFinite(val)?fmt(val,3).replace(/,?0+$/,''): '—')+' <span class="unit">'+(units[key]||'')+'</span></div><div class="state" style="color:'+color+'">'+translatedState(c.state)+'</div><div class="zscore">'+tr('z')+' '+(Number.isFinite(Number(c.z))?fmt(c.z,2):'—')+'</div>'+(source?'<img class="source-spark" loading="lazy" src="'+source.chart+'&t='+Date.now()+'" alt="Chart: '+(names[key]||c.name||key)+'" onerror="this.alt=\'Chart konnte nicht geladen werden\';this.style.display=\'none\'"><a class="source-link" href="'+source.url+'" target="_blank" rel="noreferrer">Quelle öffnen ↗</a>':'')+'</div>';
     }).join('');
     $('updated').textContent=tr('updated')+(d.date?d.date.split('-').reverse().join('.'): '—')+tr('success');
   }catch(e){$('updated').textContent=tr('failed');$('loadError').textContent=tr('error')+e.message+tr('retry');}
