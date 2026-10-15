@@ -740,11 +740,11 @@ $('refresh').addEventListener('click',loadData);loadData().then(()=>{applyLangua
  const cueText={de:'WEITER ENTDECKEN',en:'SCROLL TO EXPLORE',es:'SIGUE EXPLORANDO',ar:'تابع الاستكشاف'};
  function updateLanguageCue(){const select=document.getElementById('languageSelect');const lang=select?select.value:'de';const el=document.getElementById('scrollCueText');if(el)el.textContent=cueText[lang]||cueText.de;rail.setAttribute('aria-label',({de:'Seitenabschnitte',en:'Page sections',es:'Secciones de la página',ar:'أقسام الصفحة'})[lang]||cueText.de);}
  updateLanguageCue();const ls=document.getElementById('languageSelect');if(ls)ls.addEventListener('change',updateLanguageCue);
- function updateProgress(){const doc=document.documentElement,range=doc.scrollHeight-innerHeight,p=range>0?Math.max(0,Math.min(100,scrollY/range*100)):0;progress.style.width=p+'%';}
- updateProgress();addEventListener('scroll',updateProgress,{passive:true});addEventListener('resize',updateProgress);
+ let previousY=window.scrollY,scrollTick=false;function updateProgress(){const doc=document.documentElement,range=doc.scrollHeight-innerHeight,p=range>0?Math.max(0,Math.min(100,scrollY/range*100)):0;progress.style.width=p+'%';const y=window.scrollY,delta=y-previousY;if(Math.abs(delta)>1){body.dataset.scrollDirection=delta<0?'up':'down';previousY=y;}body.style.setProperty('--cosmic-shift',(-y*.025)+'px');scrollTick=false;}function onScroll(){if(!scrollTick){requestAnimationFrame(updateProgress);scrollTick=true;}}
+ updateProgress();addEventListener('scroll',onScroll,{passive:true});addEventListener('resize',updateProgress);
  if('IntersectionObserver'in window&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
   body.classList.add('js-scroll');
-  const reveal=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('in-view');}),{threshold:.08,rootMargin:'0px 0px -6% 0px'});
+  const reveal=new IntersectionObserver(entries=>entries.forEach(entry=>{entry.target.classList.toggle('in-view',entry.isIntersecting);}),{threshold:.08,rootMargin:'0px 0px -6% 0px'});
   document.querySelectorAll('.intro-panel,.hero,.section,.method-strip,.footer').forEach(el=>reveal.observe(el));
   const active=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;const idx=id==='components'?2:id==='mainChart'?3:id==='score'||id==='regime'?1:id==='methodTitle'?4:id==='introTitle'?0:0;buttons.forEach((b,i)=>{const on=i===idx;b.setAttribute('aria-current',on?'step':'false');});}}),{threshold:.3,rootMargin:'-20% 0px -35% 0px'});
   [document.getElementById('introTitle'),document.getElementById('score'),document.getElementById('components'),document.getElementById('mainChart'),document.getElementById('methodTitle')].filter(Boolean).forEach(el=>active.observe(el));
