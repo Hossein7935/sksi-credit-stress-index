@@ -674,6 +674,38 @@ body.light #chartWrap.is-3d #chartTip{background:rgba(249,252,255,.94)!important
 #chartWrap.is-3d #historyChart text{fill:var(--text)!important}
 #chartWrap.is-3d:before,#chartWrap.is-3d:after{display:none!important}
 
+
+/* Final layout correction: WebGL gets the full chart footprint, never a shrunken plot. */
+#chartWrap.is-3d{
+  min-height:390px!important;height:auto!important;overflow:hidden!important;
+  transform:none!important;perspective:none!important;transform-style:flat!important;
+  padding:0!important;box-sizing:border-box!important;
+}
+#chartWrap.is-3d #sksiWebGL{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  min-height:390px!important;display:block;z-index:0!important;pointer-events:none!important;
+}
+#chartWrap.is-3d #historyChart{
+  display:block!important;position:relative!important;z-index:1!important;
+  width:100%!important;height:390px!important;min-height:390px!important;max-height:none!important;
+  transform:none!important;filter:none!important;overflow:visible!important;
+}
+#chartWrap.is-3d #historyChart>rect:first-child{opacity:0!important}
+#chartWrap.is-3d #historyChart>path:not(#crosshair path),
+#chartWrap.is-3d #historyChart>polyline:not(#crosshair polyline),
+#chartWrap.is-3d #historyChart>circle:not(#crosshair circle){opacity:0!important}
+#chartWrap.is-3d #historyChart #crosshair,
+#chartWrap.is-3d #historyChart #crosshair line,
+#chartWrap.is-3d #historyChart #crosshair circle{opacity:1!important}
+#chartWrap.is-3d #historyChart text{fill:var(--text)!important;stroke:none!important}
+#chartWrap.is-3d:before,#chartWrap.is-3d:after{display:none!important}
+#chartWrap.is-3d #chartTip{transform:none!important;z-index:5!important}
+body.light #chartWrap.is-3d{background:#f7fbff!important;border-color:rgba(59,130,246,.25)!important}
+@media(max-width:600px){
+ #chartWrap.is-3d,#chartWrap.is-3d #sksiWebGL{min-height:340px!important}
+ #chartWrap.is-3d #historyChart{height:340px!important;min-height:340px!important}
+}
+
 </style>
 </head>
 <body>
@@ -758,7 +790,7 @@ function sksi3dDraw(rows){
   const engine=new BABYLON.Engine(canvas,true,{antialias:true,stencil:true,preserveDrawingBuffer:false});
   const scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(0.015,0.035,0.075,1);
   const camera=new BABYLON.ArcRotateCamera('sksiCamera',-Math.PI/2,1.12,12,new BABYLON.Vector3(0,0,0),scene);
-  camera.lowerRadiusLimit=8;camera.upperRadiusLimit=18;camera.wheelPrecision=70;camera.panningSensibility=0;camera.attachControl(canvas,true);
+  camera.lowerRadiusLimit=7;camera.upperRadiusLimit=14;camera.radius=9.3;camera.wheelPrecision=55;camera.panningSensibility=0;camera.attachControl(canvas,true);
   const hemi=new BABYLON.HemisphericLight('sksiAmbient',new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.85;
   const point=new BABYLON.PointLight('sksiCyanLight',new BABYLON.Vector3(-3,5,5),scene);point.diffuse=new BABYLON.Color3(.15,.8,1);point.intensity=2.1;
   const glow=new BABYLON.GlowLayer('sksiGlow',scene,{blurKernelSize:48});glow.intensity=.65;
@@ -808,8 +840,8 @@ function renderChart(){
  const tickStep=last-firstYear>22?5:last-firstYear>12?2:1;
  for(let yr=Math.ceil(firstYear/tickStep)*tickStep;yr<=last;yr+=tickStep){let i=rows.findIndex(r=>Number(r.date.slice(0,4))>=yr);if(i<0)continue;const xx=x(i);svg.appendChild(svgEl('line',{x1:xx,y1:T,x2:xx,y2:H-B,stroke:vgrid,'stroke-width':1}));svg.appendChild(svgEl('text',{x:xx,y:H-17,fill:yearTxt,'font-size':12,'text-anchor':'middle'},String(yr)));}
  const is3d=wrap.classList.contains('is-3d');
- const px3=(i)=>{const t=i/(rows.length-1);return is3d?L+32+(PW*.92-32)*t:x(i);};
- const py3=(v,i)=>{const t=i/(rows.length-1);return is3d?T+18+(y(v)-T)*.78+(1-t)*36:y(v);};
+ const px3=(i)=>x(i);
+ const py3=(v,i)=>y(v);
  const points=rows.map((r,i)=>px3(i)+','+py3(r.score,i)).join(' ');
  const area='M '+px3(0)+' '+py3(0,0)+' L '+rows.map((r,i)=>px3(i)+' '+py3(r.score,i)).join(' L ')+' L '+px3(rows.length-1)+' '+py3(0,rows.length-1)+' Z';
  const defs=svgEl('defs',{});
