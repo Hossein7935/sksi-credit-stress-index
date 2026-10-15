@@ -1,20 +1,20 @@
 {
-  "date": "2026-10-02",
-  "score": 17.32,
+  "date": "2026-10-09",
+  "score": 17.07,
   "regime": "normal",
   "quorum": false,
-  "raw": -0.529834,
+  "raw": -0.54523,
   "components": {
     "hy": {
       "name": "High-Yield-OAS",
-      "value": 3.1,
-      "z": -0.716,
+      "value": 3.11,
+      "z": -0.712,
       "state": "niedrig"
     },
     "ig": {
       "name": "Investment-Grade-OAS",
-      "value": 0.85,
-      "z": -0.58,
+      "value": 0.83,
+      "z": -0.634,
       "state": "niedrig"
     },
     "def": {
@@ -25,8 +25,8 @@
     },
     "nfci": {
       "name": "NFCI",
-      "value": -0.494,
-      "z": 0.326,
+      "value": -0.499,
+      "z": 0.301,
       "state": "normal"
     }
   },
