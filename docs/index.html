@@ -689,6 +689,20 @@ body.light #chartWrap.is-3d #chartTip{background:rgba(249,252,255,.94)!important
 body.light #chartWrap.is-3d{background:#06101f!important;border-color:rgba(34,211,238,.52)!important}
 body.light #chartWrap.is-3d #historyChart text{fill:#b7d8ed!important}
 @media(max-width:600px){#chartWrap.is-3d{height:380px!important;min-height:380px!important}#chartWrap.is-3d #historyChart{height:380px!important;min-height:380px!important}}
+/* SKSI 3D redesign v2: WebGL is the chart, not a decoration behind SVG. */
+#chartWrap.is-3d{height:460px!important;min-height:460px!important;overflow:hidden!important;position:relative!important;background:#06101f!important;border:1px solid rgba(34,211,238,.42)!important;border-radius:16px!important;box-shadow:inset 0 0 50px rgba(0,195,255,.045),0 14px 38px rgba(0,0,0,.2)!important;isolation:isolate}
+#chartWrap.is-3d #sksiWebGL{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:100%!important;z-index:2!important;display:block!important;pointer-events:auto!important;touch-action:pan-y!important;outline:none}
+#chartWrap.is-3d #historyChart{position:absolute!important;inset:0!important;z-index:3!important;width:100%!important;height:100%!important;min-height:100%!important;max-height:none!important;transform:none!important;filter:none!important;background:transparent!important;pointer-events:none!important;overflow:visible!important}
+#chartWrap.is-3d #historyChart>rect,#chartWrap.is-3d #historyChart>line,#chartWrap.is-3d #historyChart>path,#chartWrap.is-3d #historyChart>polyline,#chartWrap.is-3d #historyChart>circle{display:none!important}
+#chartWrap.is-3d #historyChart #crosshair{display:block!important}
+#chartWrap.is-3d #historyChart #crosshair line,#chartWrap.is-3d #historyChart #crosshair circle{display:block!important;opacity:.9!important}
+#chartWrap.is-3d #historyChart text{fill:#bcefff!important;stroke:none!important;font-size:12px!important}
+#chartWrap.is-3d #chartTip{z-index:5!important;pointer-events:none!important;background:rgba(3,18,34,.96)!important;color:#e4fbff!important;border:1px solid rgba(34,211,238,.62)!important;box-shadow:0 10px 34px rgba(0,0,0,.42),0 0 22px rgba(0,190,255,.08)!important}
+body.light #chartWrap.is-3d{background:#06101f!important;border-color:rgba(34,211,238,.42)!important}
+body.light #chartWrap.is-3d #historyChart text{fill:#bcefff!important}
+@media(max-width:760px){#chartWrap.is-3d{height:390px!important;min-height:390px!important}#chartWrap.is-3d #historyChart{height:100%!important}}
+
+
 </style>
 </head>
 <body>
@@ -760,8 +774,7 @@ const SOURCES={
 let chartRows=[],chartYears=0,chartSelected=null;
 const NS='http://www.w3.org/2000/svg';
 function svgEl(tag,attrs={},txt=''){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;return e;}
-/* Actual Three.js WebGL 3D scene for the SKSI history chart. */
-/* SKSI NEBULA: fixed-color Babylon.js real-time 3D scene. */
+/* True 3D chart: the time series stays planar; depth belongs to the frame, not the data. */
 let sksi3dScene=null;
 function sksi3dDraw(rows){
  const wrap=$('chartWrap'),enabled=wrap.classList.contains('is-3d');
@@ -769,58 +782,48 @@ function sksi3dDraw(rows){
  if(!window.BABYLON){$('loadError').textContent='Die 3D-Engine konnte nicht geladen werden.';return;}
  let q=sksi3dScene;
  if(!q){
-  const canvas=document.createElement('canvas');canvas.id='sksiWebGL';canvas.setAttribute('aria-label','SKSI Nebula – interaktive 3D-Zeitreihe');wrap.insertBefore(canvas,wrap.firstChild);
-  const engine=new BABYLON.Engine(canvas,true,{antialias:true,stencil:true,preserveDrawingBuffer:false,adaptToDeviceRatio:true});
-  const scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(.008,.018,.042,1);scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.018;scene.fogColor=new BABYLON.Color3(.008,.018,.042);
-  const camera=new BABYLON.ArcRotateCamera('nebulaCamera',-Math.PI/2,1.06,9.3,new BABYLON.Vector3(0,0,0),scene);
-  camera.lowerRadiusLimit=7.4;camera.upperRadiusLimit=13;camera.lowerBetaLimit=.68;camera.upperBetaLimit=1.42;camera.wheelPrecision=45;camera.panningSensibility=0;camera.inertia=.82;
-  const hemi=new BABYLON.HemisphericLight('nebulaAmbient',new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.72;
-  const lamp=new BABYLON.PointLight('nebulaKey',new BABYLON.Vector3(-3,4,5),scene);lamp.diffuse=new BABYLON.Color3(.12,.86,1);lamp.specular=new BABYLON.Color3(.3,.9,1);lamp.intensity=2.6;
-  const rim=new BABYLON.PointLight('nebulaRim',new BABYLON.Vector3(4,2,-3),scene);rim.diffuse=new BABYLON.Color3(.22,.2,1);rim.intensity=1.5;
-  const glow=new BABYLON.GlowLayer('nebulaBloom',scene,{blurKernelSize:64});glow.intensity=.78;
-  q=sksi3dScene={canvas,engine,scene,camera,glow,root:null,rows:[],scan:null,beacon:null,light:false};
-  engine.runRenderLoop(()=>{if(!sksi3dScene||sksi3dScene.canvas.style.display==='none')return;const t=performance.now()*.001;if(sksi3dScene.scan)sksi3dScene.scan.position.x=Math.sin(t*.42)*4.02;if(sksi3dScene.beacon){const p=1+Math.sin(t*2.4)*.16;sksi3dScene.beacon.scaling.set(p,p,p);}sksi3dScene.scene.render();});
+  const canvas=document.createElement('canvas');canvas.id='sksiWebGL';canvas.tabIndex=0;canvas.setAttribute('aria-label','SKSI 3D-Zeitreihe. Mit der Maus ziehen zum Drehen, mit dem Mausrad zoomen.');wrap.insertBefore(canvas,wrap.firstChild);
+  const engine=new BABYLON.Engine(canvas,true,{antialias:true,stencil:false,preserveDrawingBuffer:false,adaptToDeviceRatio:true});
+  const scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(.004,.012,.027,1);scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.012;scene.fogColor=new BABYLON.Color3(.004,.012,.027);
+  const camera=new BABYLON.ArcRotateCamera('sksiCamera',-Math.PI/2,1.18,10.1,new BABYLON.Vector3(0,.05,0),scene);camera.lowerRadiusLimit=7.1;camera.upperRadiusLimit=15;camera.lowerBetaLimit=.68;camera.upperBetaLimit=1.48;camera.panningSensibility=0;camera.inertia=.72;
+  const hemi=new BABYLON.HemisphericLight('sksiAmbient',new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.78;
+  const key=new BABYLON.PointLight('sksiKey',new BABYLON.Vector3(-3,4,-4),scene);key.diffuse=new BABYLON.Color3(.1,.78,.95);key.specular=new BABYLON.Color3(.18,.82,1);key.intensity=1.3;
+  const glow=new BABYLON.GlowLayer('sksiGlow',scene,{blurKernelSize:32});glow.intensity=.28;
+  q=sksi3dScene={canvas,engine,scene,camera,glow,root:null,rows:[],drag:null};
+  engine.runRenderLoop(()=>{if(sksi3dScene&&sksi3dScene.canvas.style.display!=='none')sksi3dScene.scene.render();});
   window.addEventListener('resize',()=>{if(sksi3dScene)sksi3dScene.engine.resize();});
+  canvas.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')return;q.drag={x:e.clientX,y:e.clientY,alpha:q.camera.alpha,beta:q.camera.beta};canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointerup',()=>{q.drag=null;});canvas.addEventListener('pointercancel',()=>{q.drag=null;});
+  canvas.addEventListener('pointermove',e=>{const rect=canvas.getBoundingClientRect();if(q.drag){const dx=e.clientX-q.drag.x,dy=e.clientY-q.drag.y;q.camera.alpha=q.drag.alpha-dx*.006;q.camera.beta=Math.max(.68,Math.min(1.48,q.drag.beta+dy*.004));}const norm=(e.clientX-rect.left)/rect.width,plot=(norm-.062)/.916,i=Math.max(0,Math.min(q.rows.length-1,Math.round(plot*(q.rows.length-1))));if(q.rows.length&&plot>=-.02&&plot<=1.02)showChartPoint(i,e.clientX,e.clientY,false);});
+  canvas.addEventListener('pointerleave',()=>{if(!chartSelected){const tip=$('chartTip'),cross=$('crosshair');if(tip)tip.style.display='none';if(cross)cross.setAttribute('visibility','hidden');}});
+  canvas.addEventListener('wheel',e=>{e.preventDefault();q.camera.radius=Math.max(7.1,Math.min(15,q.camera.radius+Math.sign(e.deltaY)*.45));},{passive:false});
+  canvas.addEventListener('click',e=>{if(!q.rows.length)return;const r=canvas.getBoundingClientRect(),plot=((e.clientX-r.left)/r.width-.062)/.916,i=Math.max(0,Math.min(q.rows.length-1,Math.round(plot*(q.rows.length-1))));showChartPoint(i,e.clientX,e.clientY,true);});
  }
- q.canvas.style.display='block';q.rows=rows;
- /* Deliberately fixed palette: the 3D hologram never changes color in light/dark mode. */
- q.scene.clearColor=new BABYLON.Color4(.008,.018,.042,1);q.scene.fogColor=new BABYLON.Color3(.008,.018,.042);q.glow.intensity=.78;
- if(q.root)q.root.dispose(false,true);
- q.root=new BABYLON.TransformNode('nebulaDataLayer',q.scene);
- const add=mesh=>{mesh.parent=q.root;return mesh;};
- const material=(name,color,emissive,alpha=1)=>{const m=new BABYLON.StandardMaterial(name,q.scene);m.diffuseColor=BABYLON.Color3.FromHexString(color);m.emissiveColor=BABYLON.Color3.FromHexString(emissive);m.alpha=alpha;m.specularColor=new BABYLON.Color3(.55,.92,1);m.specularPower=128;m.backFaceCulling=false;return m;};
- const cyan=material('nebulaCyan','#22d3ee','#00d9ff',.72);
- const grid=material('nebulaGrid','#0d4966','#075b7b',.48);
- const baseY=-1.72;
- /* Perspective floor grid, with stronger distance rails to establish scale and depth. */
- for(let x=-4.2;x<=4.201;x+=.42)add(BABYLON.MeshBuilder.CreateLines('floorLongitudinal',{points:[new BABYLON.Vector3(x,baseY,-2.7),new BABYLON.Vector3(x,baseY,2.7)]},q.scene)).material=grid;
- for(let z=-2.7;z<=2.701;z+=.36)add(BABYLON.MeshBuilder.CreateLines('floorCrossGrid',{points:[new BABYLON.Vector3(-4.2,baseY,z),new BABYLON.Vector3(4.2,baseY,z)]},q.scene)).material=grid;
- for(const z of [-2.7,2.7])add(BABYLON.MeshBuilder.CreateLines('depthRail',{points:[new BABYLON.Vector3(-4.2,baseY,z),new BABYLON.Vector3(4.2,baseY,z)]},q.scene)).material=cyan;
- [{v:48,c:'#facc15'},{v:68,c:'#fb923c'},{v:84,c:'#fb7185'}].forEach(t=>{const y=-1.65+t.v/100*3.15,m=material('riskThreshold'+t.v,t.c,t.c,.8);add(BABYLON.MeshBuilder.CreateLines('riskThreshold',{points:[new BABYLON.Vector3(-4.2,y,0),new BABYLON.Vector3(4.2,y,0)]},q.scene)).material=m;});
- const pts=rows.map((r,i)=>new BABYLON.Vector3(-4+8*i/(rows.length-1),-1.65+Math.max(0,Math.min(100,r.score))/100*3.15,Math.sin(i/(rows.length-1)*Math.PI*2)*.32));
- /* Real translucent ribbon beneath the curve, with a raised back edge. */
- const floorPts=pts.map(p=>new BABYLON.Vector3(p.x,baseY+.025,p.z));
- const ribbon=BABYLON.MeshBuilder.CreateRibbon('nebulaGlassSurface',{pathArray:[pts,floorPts],sideOrientation:BABYLON.Mesh.DOUBLESIDE,updatable:false},q.scene);add(ribbon);
- ribbon.material=material('nebulaGlassMaterial','#087da5','#00cfff',.12);ribbon.isPickable=false;
- const lowerPts=pts.map(p=>new BABYLON.Vector3(p.x,baseY+.025,p.z));
- const sidePath=pts.concat([...lowerPts].reverse());
- const side=BABYLON.MeshBuilder.CreateRibbon('nebulaVolumeWall',{pathArray:[pts,lowerPts],sideOrientation:BABYLON.Mesh.DOUBLESIDE},q.scene);add(side);side.material=material('nebulaVolumeEdge','#0b678d','#007da8',.18);side.isPickable=false;
- /* Score columns make the data's vertical magnitude readable in 3D. */
- const stride=Math.max(1,Math.floor(rows.length/58));
- const columnMat=material('nebulaColumnMaterial','#0d7196','#00bde9',.5);
- for(let i=0;i<pts.length;i+=stride){const p=pts[i];const col=BABYLON.MeshBuilder.CreateLines('scoreColumn',{points:[new BABYLON.Vector3(p.x,baseY,p.z),new BABYLON.Vector3(p.x,p.y,p.z)]},q.scene);add(col).material=columnMat;}
- /* A wide atmospheric outer tube and a crisp fixed-cyan core. */
- add(BABYLON.MeshBuilder.CreateTube('nebulaOuterTrace',{path:pts,radius:.095,tessellation:14,cap:BABYLON.Mesh.CAP_ALL},q.scene)).material=material('nebulaOuterMaterial','#00a6ce','#00cfff',.28);
- add(BABYLON.MeshBuilder.CreateTube('nebulaCoreTrace',{path:pts,radius:.031,tessellation:12,cap:BABYLON.Mesh.CAP_ALL},q.scene)).material=material('nebulaCoreMaterial','#9af7ff','#26e8ff',1);
- const pointMat=material('nebulaNodeMaterial','#9af7ff','#21e6ff',1);
- for(let i=0;i<pts.length;i+=stride){const node=BABYLON.MeshBuilder.CreateSphere('historyNode',{diameter:.065,segments:10},q.scene);node.position.copyFrom(pts[i]);node.material=pointMat;add(node);}
- const last=pts[pts.length-1];
- const beacon=add(BABYLON.MeshBuilder.CreateSphere('liveStressBeacon',{diameter:.24,segments:28},q.scene));beacon.position.copyFrom(last);beacon.material=material('liveBeaconMaterial','#d5fdff','#00eaff',1);q.beacon=beacon;
- const halo=add(BABYLON.MeshBuilder.CreateSphere('liveBeaconHalo',{diameter:.44,segments:20},q.scene));halo.position.copyFrom(last);halo.material=material('liveBeaconHaloMaterial','#00cfff','#00dfff',.14);halo.isPickable=false;
- const scanMat=material('nebulaScanMaterial','#40f4ff','#00eaff',.32);
- q.scan=add(BABYLON.MeshBuilder.CreateBox('movingScanPlane',{width:.018,height:3.65,depth:5.1},q.scene));q.scan.position.set(-4,.05,0);q.scan.material=scanMat;q.scan.isPickable=false;
+ q.canvas.style.display='block';q.rows=rows;q.scene.clearColor=new BABYLON.Color4(.004,.012,.027,1);q.scene.fogColor=new BABYLON.Color3(.004,.012,.027);q.glow.intensity=.28;
+ if(q.root)q.root.dispose(false,true);q.root=new BABYLON.TransformNode('sksiChartRoot',q.scene);const add=m=>{m.parent=q.root;return m;};
+ const mat=(name,color,emissive,alpha=1)=>{const m=new BABYLON.StandardMaterial(name,q.scene);m.diffuseColor=BABYLON.Color3.FromHexString(color);m.emissiveColor=BABYLON.Color3.FromHexString(emissive);m.alpha=alpha;m.specularColor=new BABYLON.Color3(.12,.42,.5);m.specularPower=48;m.backFaceCulling=false;return m;};
+ const baseY=-1.62,backZ=1.45,frontZ=-2.15,x0=-3.82,x1=3.82,gridLines=[],wallLines=[];
+ for(let i=0;i<=20;i++){const x=x0+(x1-x0)*i/20;gridLines.push([new BABYLON.Vector3(x,baseY,frontZ),new BABYLON.Vector3(x,baseY,backZ)]);}
+ for(let i=0;i<=10;i++){const z=frontZ+(backZ-frontZ)*i/10;gridLines.push([new BABYLON.Vector3(x0,baseY,z),new BABYLON.Vector3(x1,baseY,z)]);}
+ for(let i=0;i<=20;i++){const x=x0+(x1-x0)*i/20;wallLines.push([new BABYLON.Vector3(x,baseY,backZ),new BABYLON.Vector3(x,1.62,backZ)]);}
+ for(let i=0;i<=10;i++){const y=baseY+(1.62-baseY)*i/10;wallLines.push([new BABYLON.Vector3(x0,y,backZ),new BABYLON.Vector3(x1,y,backZ)]);}
+ const grid=add(BABYLON.MeshBuilder.CreateLineSystem('sksiFloorGrid',{lines:gridLines},q.scene));grid.material=mat('sksiGridMaterial','#0b3b52','#062b3d',.68);grid.isPickable=false;
+ const wall=add(BABYLON.MeshBuilder.CreateLineSystem('sksiBackGrid',{lines:wallLines},q.scene));wall.material=mat('sksiWallGridMaterial','#0b3b52','#062b3d',.56);wall.isPickable=false;
+ const frameLines=[[new BABYLON.Vector3(x0,baseY,frontZ),new BABYLON.Vector3(x1,baseY,frontZ)],[new BABYLON.Vector3(x0,baseY,frontZ),new BABYLON.Vector3(x0,baseY,backZ)],[new BABYLON.Vector3(x1,baseY,frontZ),new BABYLON.Vector3(x1,baseY,backZ)],[new BABYLON.Vector3(x0,baseY,backZ),new BABYLON.Vector3(x0,1.62,backZ)],[new BABYLON.Vector3(x0,1.62,backZ),new BABYLON.Vector3(x1,1.62,backZ)],[new BABYLON.Vector3(x1,baseY,backZ),new BABYLON.Vector3(x1,1.62,backZ)]];
+ const frame=add(BABYLON.MeshBuilder.CreateLineSystem('sksiFrame',{lines:frameLines},q.scene));frame.material=mat('sksiFrameMaterial','#1989a8','#087b9d',.95);frame.isPickable=false;
+ const thresholds=[48,68,84].map(v=>{const y=baseY+v/100*3.24;return [new BABYLON.Vector3(x0,y,backZ-.015),new BABYLON.Vector3(x1,y,backZ-.015)];});
+ const thresholdMesh=add(BABYLON.MeshBuilder.CreateLineSystem('sksiThresholds',{lines:thresholds},q.scene));thresholdMesh.material=mat('sksiThresholdMaterial','#22bfe0','#087f9f',.85);thresholdMesh.isPickable=false;
+ const pts=rows.map((r,i)=>new BABYLON.Vector3(x0+(x1-x0)*i/Math.max(1,rows.length-1),baseY+Math.max(0,Math.min(100,Number(r.score)))/100*3.24,.12));
+ const floorPts=pts.map(p=>new BABYLON.Vector3(p.x,baseY+.012,p.z));
+ const area=add(BABYLON.MeshBuilder.CreateRibbon('sksiArea',{pathArray:[pts,floorPts],sideOrientation:BABYLON.Mesh.DOUBLESIDE},q.scene));area.material=mat('sksiAreaMaterial','#087da5','#005a7d',.22);area.isPickable=false;
+ const outer=add(BABYLON.MeshBuilder.CreateTube('sksiCurveBloom',{path:pts,radius:.045,tessellation:8,cap:BABYLON.Mesh.CAP_ALL},q.scene));outer.material=mat('sksiCurveBloomMaterial','#00bce8','#00a6ce',.3);outer.isPickable=false;
+ const curve=add(BABYLON.MeshBuilder.CreateTube('sksiCurve',{path:pts,radius:.014,tessellation:8,cap:BABYLON.Mesh.CAP_ALL},q.scene));curve.material=mat('sksiCurveMaterial','#8cecff','#2adfff',1);curve.isPickable=false;
+ const columns=[],stride=Math.max(1,Math.floor(rows.length/34));for(let i=0;i<pts.length;i+=stride)columns.push([new BABYLON.Vector3(pts[i].x,baseY+.015,pts[i].z),pts[i]]);
+ const stems=add(BABYLON.MeshBuilder.CreateLineSystem('sksiHistoryStems',{lines:columns},q.scene));stems.material=mat('sksiStemMaterial','#137b9a','#087c9b',.58);stems.isPickable=false;
+ const last=pts[pts.length-1],beacon=add(BABYLON.MeshBuilder.CreateSphere('sksiLatestPoint',{diameter:.105,segments:16},q.scene));beacon.position.copyFrom(last);beacon.material=mat('sksiLatestMaterial','#d8fbff','#22d3ee',1);beacon.isPickable=false;
  q.engine.resize();
 }
+
 function renderChart(){
  const svg=$('historyChart'),wrap=$('chartWrap'),tip=$('chartTip');if(!svg||!chartRows.length)return;
  const all=chartRows;const lastYear=Number(all[all.length-1].date.slice(0,4));const minYear=chartYears?lastYear-chartYears: Number(all[0].date.slice(0,4));
@@ -948,14 +951,9 @@ document.getElementById('languageSelect').addEventListener('change',e=>applyLang
 try{document.getElementById('languageSelect').value=localStorage.getItem(LANG_KEY)||'de'}catch(e){}
 document.querySelectorAll('.range-btn').forEach(btn=>btn.addEventListener('click',()=>{chartYears=Number(btn.dataset.years);document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',b===btn));chartSelected=false;renderChart();}));
  const chartWrap=document.getElementById('chartWrap'),chart3DButton=document.getElementById('chart3DButton');
- function setChart3D(enabled){if(!chartWrap)return;chartWrap.classList.toggle('is-3d',enabled);if(chart3DButton){chart3DButton.setAttribute('aria-pressed',enabled?'true':'false');chart3DButton.textContent=enabled?'◇ 3D-Ansicht aktiv':'◇ 3D-Ansicht';}renderChart();}
+ function setChart3D(enabled){if(!chartWrap)return;chartWrap.classList.toggle('is-3d',enabled);if(chart3DButton){chart3DButton.setAttribute('aria-pressed',enabled?'true':'false');chart3DButton.textContent=enabled?'◇ 3D aktiv':'◇ 3D-Ansicht';}chartSelected=false;renderChart();}
  if(chart3DButton)chart3DButton.addEventListener('click',event=>{event.stopPropagation();setChart3D(!chartWrap.classList.contains('is-3d'));});
- if(chartWrap){
-   chartWrap.addEventListener('click',event=>{if(event.target.closest('.chart-tip')||event.target.closest('.range-btn')||event.target.closest('#chart3DButton')||event.target.closest('svg'))return;setChart3D(!chartWrap.classList.contains('is-3d'));});
-   chartWrap.addEventListener('pointermove',event=>{if(!sksi3dScene||!chartWrap.classList.contains('is-3d')||event.pointerType==='touch')return;const r=chartWrap.getBoundingClientRect();sksi3dScene.camera.alpha=-Math.PI/2+((event.clientX-r.left)/r.width-.5)*.75;sksi3dScene.camera.beta=1.12+((event.clientY-r.top)/r.height-.5)*.32;});
-   chartWrap.addEventListener('pointerleave',()=>{if(sksi3dScene){sksi3dScene.camera.alpha=-Math.PI/2;sksi3dScene.camera.beta=1.12;}});
-  }
-
+ /* Chart clicks no longer toggle modes; the canvas handles rotate, zoom and data selection. */
  document.querySelectorAll('[data-explore]').forEach(btn=>btn.addEventListener('click',()=>{
   const id=btn.dataset.explore,target=id==='score'?document.getElementById('score'):document.getElementById(id);
   if(target)target.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:id==='score'?'center':'start'});
