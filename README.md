@@ -1,5 +1,7 @@
 # SKSI — Synchronisierter Kreditstress-Index
 
+https://hossein7935.github.io/sksi-credit-stress-index/
+
 Wöchentlicher Index dafür, ob Angst vor Unternehmensausfällen gerade ein Einzelfall ist oder auf solide Firmen und die Finanzierung übergreift.
 
 Stand **2. Oktober 2026: 17 / 100, ruhig.** High-Yield-OAS, Investment-Grade-OAS und die Ausfallprämie liegen unter ihrem normalen Niveau. Kein Quorum.
