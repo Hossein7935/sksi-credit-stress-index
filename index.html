@@ -719,6 +719,22 @@ body.light #chartWrap.is-3d #historyChart text{fill:#b7d8ed!important}
 @keyframes sksiGridDrift{from{background-position:0 0,0 0}to{background-position:0 38px,38px 0}}
 @media(prefers-reduced-motion:reduce){#chartWrap.is-3d .sksi-environment-grid:before{animation:none!important}}
 
+
+/* REAL 3D ENVIRONMENT — WebGL scene is the stage, the chart remains a thin overlay. */
+#chartWrap.is-3d{position:relative!important;isolation:isolate!important;overflow:hidden!important;min-height:420px!important;height:420px!important;background:radial-gradient(ellipse at 50% 42%,#0b2844 0%,#061323 46%,#020711 100%)!important;border:1px solid rgba(34,211,238,.6)!important;box-shadow:inset 0 0 90px rgba(0,180,255,.12),0 0 42px rgba(0,195,255,.12)!important}
+#chartWrap.is-3d #sksiWebGL{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:0!important;display:block!important;opacity:1!important;pointer-events:none!important}
+#chartWrap.is-3d #historyChart{position:relative!important;z-index:1!important;width:100%!important;height:100%!important;min-height:420px!important;background:transparent!important;overflow:visible!important}
+#chartWrap.is-3d #historyChart>rect:first-child{fill:rgba(2,10,23,.2)!important;opacity:1!important}
+#chartWrap.is-3d #historyChart .spatial-curve{stroke:#9af5ff!important;stroke-width:2.6!important;filter:drop-shadow(0 0 2px rgba(103,232,249,.7))!important}
+#chartWrap.is-3d #historyChart .sksi-neon-halo{stroke-width:4!important;opacity:.07!important;filter:blur(2px)!important}
+#chartWrap.is-3d #historyChart .plot-extrusion polyline{stroke-width:2!important;opacity:.45!important}
+#chartWrap.is-3d #historyChart text{fill:#b8e7f7!important;paint-order:stroke;stroke:rgba(2,10,23,.5);stroke-width:2px}
+#chartWrap.is-3d .sksi-environment-grid{display:none!important}
+#chartWrap.is-3d:before{content:"SKSI  /  SPATIAL CREDIT INTELLIGENCE";position:absolute;top:12px;left:16px;z-index:3;color:rgba(150,235,255,.68);font:700 9px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.2em;pointer-events:none}
+#chartWrap.is-3d:after{content:"LIVE DATA SPACE   •   MULTI-DIMENSIONAL VIEW";position:absolute;right:14px;bottom:10px;z-index:3;color:rgba(103,232,249,.45);font:600 8px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;pointer-events:none}
+@media(max-width:600px){#chartWrap.is-3d{height:380px!important;min-height:380px!important}#chartWrap.is-3d #historyChart{min-height:380px!important}}
+@media(prefers-reduced-motion:reduce){#chartWrap.is-3d:after{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -793,8 +809,69 @@ function svgEl(tag,attrs={},txt=''){const e=document.createElementNS(NS,tag);Obj
 /* Keep the chart's full SVG visible. Its data labels, threshold lines and extrusion form one coherent plot. */
 let sksi3dScene=null;
 function sksi3dDraw(rows){
- const canvas=document.getElementById('sksiWebGL');
- if(canvas)canvas.style.display='none';
+ const wrap=document.getElementById('chartWrap');
+ if(!wrap)return;
+ let canvas=document.getElementById('sksiWebGL');
+ if(!canvas){canvas=document.createElement('canvas');canvas.id='sksiWebGL';canvas.setAttribute('aria-hidden','true');wrap.prepend(canvas);}
+ const active=wrap.classList.contains('is-3d');
+ canvas.style.display=active?'block':'none';
+ if(!active){if(sksi3dScene&&sksi3dScene.engine)sksi3dScene.engine.stopRenderLoop();return;}
+ if(typeof BABYLON==='undefined')return;
+ if(!sksi3dScene){
+  try{
+   const engine=new BABYLON.Engine(canvas,true,{alpha:true,antialias:true,preserveDrawingBuffer:false,stencil:true},true);
+   const scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(0,0,0,0);scene.skipPointerMovePicking=true;
+   const camera=new BABYLON.FreeCamera('sksiSpatialCamera',new BABYLON.Vector3(0,3.6,-13.8),scene);
+   camera.setTarget(new BABYLON.Vector3(0,-.2,2.5));camera.fov=.78;camera.minZ=.1;camera.maxZ=100;camera.inputs.clear();
+   const glow=new BABYLON.GlowLayer('sksiSpatialGlow',scene,{blurKernelSize:32});glow.intensity=.48;
+   const mat=(name,color,alpha=1)=>{const m=new BABYLON.StandardMaterial(name,scene);m.emissiveColor=BABYLON.Color3.FromHexString(color);m.diffuseColor=m.emissiveColor;m.alpha=alpha;return m;};
+   const cyan=mat('sksiCyan','#16d9f2',.52),blue=mat('sksiBlue','#246bff',.42),dim=mat('sksiGrid','#126b91',.28),white=mat('sksiIce','#9bf5ff',.9),violet=mat('sksiViolet','#655cff',.25);
+   const lines=[];
+   for(let x=-16;x<=16;x+=1){lines.push([new BABYLON.Vector3(x,-1.55,-5),new BABYLON.Vector3(x,-1.55,18)]);}
+   for(let z=-5;z<=18;z+=1){lines.push([new BABYLON.Vector3(-16,-1.55,z),new BABYLON.Vector3(16,-1.55,z)]);}
+   const floor=BABYLON.MeshBuilder.CreateLineSystem('sksiPerspectiveGrid',{lines},scene);floor.color=new BABYLON.Color3(.02,.38,.56);floor.alpha=.55;
+   const major=[];
+   for(let x=-16;x<=16;x+=4)major.push([new BABYLON.Vector3(x,-1.53,-5),new BABYLON.Vector3(x,-1.53,18)]);
+   for(let z=-4;z<=18;z+=4)major.push([new BABYLON.Vector3(-16,-1.53,z),new BABYLON.Vector3(16,-1.53,z)]);
+   const floorMajor=BABYLON.MeshBuilder.CreateLineSystem('sksiMajorGrid',{lines:major},scene);floorMajor.color=new BABYLON.Color3(.03,.72,.9);floorMajor.alpha=.45;
+   const horizonLines=[];
+   for(let i=0;i<9;i++){const z=-1+i*2.4;horizonLines.push([new BABYLON.Vector3(-15,-1.48,z),new BABYLON.Vector3(15,-1.48,z)]);}
+   const horizon=BABYLON.MeshBuilder.CreateLineSystem('sksiHorizon',{lines:horizonLines},scene);horizon.color=new BABYLON.Color3(.02,.65,.88);horizon.alpha=.3;
+   const towers=[];
+   for(let i=0;i<38;i++){
+    const x=-13.5+(i/37)*27,z=-.5+(Math.sin(i*1.71)+1)*4.8;
+    const h=.12+((Math.sin(i*2.37)+1)*.5)*1.3;
+    const box=BABYLON.MeshBuilder.CreateBox('sksiSignalTower'+i,{width:.035,height:h,depth:.035},scene);
+    box.position.set(x,-1.52+h/2,z);box.material=i%5===0?violet:(i%3===0?blue:cyan);towers.push({mesh:box,base:h,phase:i*.71});
+   }
+   const rings=[];
+   for(let i=0;i<4;i++){
+    const ring=BABYLON.MeshBuilder.CreateTorus('sksiOrbit'+i,{diameter:2.5+i*1.15,thickness:.012, tessellation:128},scene);
+    ring.position.set((i%2?1:-1)*(4+i*.65),.7+i*.13,5.8+i*.65);ring.rotation.x=.85+i*.12;ring.rotation.z=.18*(i-1);ring.material=i%2?blue:cyan;rings.push({mesh:ring,phase:i*.8});
+   }
+   const particleMeshes=[];
+   for(let i=0;i<100;i++){
+    const p=BABYLON.MeshBuilder.CreateSphere('sksiParticle'+i,{diameter:.025+(i%4)*.012,segments:4},scene);
+    p.position.set(Math.sin(i*12.9)*14,-.6+((i*17)%22)/10,-3+((i*13)%190)/10);
+    p.material=i%4===0?white:(i%3===0?blue:cyan);particleMeshes.push({mesh:p,phase:i*.19,speed:.18+(i%7)*.025});
+   }
+   const halo=BABYLON.MeshBuilder.CreateTorus('sksiCoreHalo',{diameter:5.2,thickness:.018,tessellation:128},scene);
+   halo.position.set(0,-.75,3.5);halo.rotation.x=Math.PI/2;halo.material=cyan;
+   scene.registerBeforeRender(()=>{
+    const t=performance.now()*.001;
+    floorMajor.alpha=.28+Math.sin(t*.55)*.09;glow.intensity=.36+Math.sin(t*.8)*.1;
+    rings.forEach((r,i)=>{r.mesh.rotation.y=t*(i%2?.09:-.07)+r.phase;r.mesh.rotation.z=Math.sin(t*.25+r.phase)*.16;});
+    towers.forEach(o=>{o.mesh.scaling.y=.6+.4*(.5+.5*Math.sin(t*.8+o.phase));});
+    particleMeshes.forEach(o=>{o.mesh.position.y=-.65+Math.sin(t*o.speed+o.phase)*.42;});
+    halo.rotation.y=t*.06;halo.rotation.z=t*.025;
+   });
+   sksi3dScene={engine,scene,canvas};
+   engine.runRenderLoop(()=>{if(!wrap.classList.contains('is-3d'))return;engine.resize();scene.render();});
+   window.addEventListener('resize',()=>{if(sksi3dScene)sksi3dScene.engine.resize();},{passive:true});
+  }catch(err){console.warn('SKSI 3D environment unavailable',err);canvas.style.display='none';return;}
+ }else{
+  sksi3dScene.engine.runRenderLoop(()=>{if(!wrap.classList.contains('is-3d'))return;sksi3dScene.engine.resize();sksi3dScene.scene.render();});
+ }
 }
 function renderChart(){
  const svg=$('historyChart'),wrap=$('chartWrap'),tip=$('chartTip');if(!svg||!chartRows.length)return;
@@ -813,6 +890,7 @@ function renderChart(){
  const tickStep=last-firstYear>22?5:last-firstYear>12?2:1;
  for(let yr=Math.ceil(firstYear/tickStep)*tickStep;yr<=last;yr+=tickStep){let i=rows.findIndex(r=>Number(r.date.slice(0,4))>=yr);if(i<0)continue;const xx=x(i);svg.appendChild(svgEl('line',{x1:xx,y1:T,x2:xx,y2:H-B,stroke:vgrid,'stroke-width':1}));svg.appendChild(svgEl('text',{x:xx,y:H-17,fill:yearTxt,'font-size':12,'text-anchor':'middle'},String(yr)));}
  const is3d=wrap.classList.contains('is-3d');
+  sksi3dDraw(rows);
  const px3=(i)=>x(i);
  const py3=(v,i)=>y(v);
  const points=rows.map((r,i)=>px3(i)+','+py3(r.score,i)).join(' ');
