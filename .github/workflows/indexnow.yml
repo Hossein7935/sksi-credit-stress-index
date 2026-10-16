@@ -1,0 +1,33 @@
+name: Search engine indexing
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'sitemap.xml'
+      - 'robots.txt'
+      - 'sksib38c469d4eb24634ea29b9d864dc1aa3.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  submit-indexnow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify IndexNow about the site URL
+        env:
+          INDEXNOW_KEY: sksib38c469d4eb24634ea29b9d864dc1aa3
+        run: |
+          curl --fail-with-body --silent --show-error \
+            -X POST 'https://api.indexnow.org/indexnow' \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            --data-binary @- <<JSON
+          {
+            "host": "hossein7935.github.io",
+            "key": "${INDEXNOW_KEY}",
+            "keyLocation": "https://hossein7935.github.io/sksi-credit-stress-index/sksib38c469d4eb24634ea29b9d864dc1aa3.txt",
+            "urlList": [
+              "https://hossein7935.github.io/sksi-credit-stress-index/"
+            ]
+          }
+          JSON
