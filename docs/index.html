@@ -870,7 +870,7 @@ function sksi3dDraw(rows){
    window.addEventListener('resize',()=>{if(sksi3dScene)sksi3dScene.engine.resize();},{passive:true});
   }catch(err){console.warn('SKSI 3D environment unavailable',err);canvas.style.display='none';return;}
  }else{
-  sksi3dScene.engine.runRenderLoop(()=>{if(!wrap.classList.contains('is-3d'))return;sksi3dScene.engine.resize();sksi3dScene.scene.render();});
+  sksi3dScene.engine.resize();
  }
 }
 function renderChart(){
