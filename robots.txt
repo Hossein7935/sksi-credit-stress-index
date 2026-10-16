@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hossein7935.github.io/sksi-credit-stress-index/sitemap.xml
+Sitemap: https://hossein7935.github.io/sksi-credit-stress-index/sitemap.txt
