@@ -677,6 +677,18 @@ body.light #chartWrap.is-3d{background:#06101f!important;border-color:rgba(34,21
 body.light #chartWrap.is-3d #historyChart text{fill:#b7d8ed!important}
 @media(max-width:600px){#chartWrap.is-3d{height:380px!important;min-height:380px!important}#chartWrap.is-3d #historyChart{height:380px!important;min-height:380px!important}}
 
+
+/* FINAL FIX: legacy 3D CSS hid every SVG path/polyline/circle, including the main data curve. */
+#chartWrap.is-3d #historyChart>rect:first-child{opacity:0!important}
+#chartWrap.is-3d #historyChart>path{opacity:1!important}
+#chartWrap.is-3d #historyChart>polyline{opacity:1!important;visibility:visible!important}
+#chartWrap.is-3d #historyChart>polyline.spatial-curve{stroke:#8cecff!important;stroke-width:4.5!important;opacity:1!important;visibility:visible!important;filter:drop-shadow(0 0 3px rgba(103,232,249,.95)) drop-shadow(0 0 9px rgba(34,211,238,.72))!important}
+#chartWrap.is-3d #historyChart>circle{opacity:1!important;visibility:visible!important}
+#chartWrap.is-3d #historyChart .plot-extrusion,#chartWrap.is-3d #historyChart .spatial-floor{display:block!important;visibility:visible!important;opacity:1!important}
+#chartWrap.is-3d #historyChart .plot-extrusion polyline{opacity:1!important;visibility:visible!important}
+#chartWrap.is-3d #historyChart .spatial-floor path,#chartWrap.is-3d #historyChart .spatial-floor line{opacity:1!important;visibility:visible!important}
+#chartWrap.is-3d #historyChart #crosshair{display:block!important;visibility:visible!important}
+
 </style>
 </head>
 <body>
