@@ -689,6 +689,7 @@ body.light #chartWrap.is-3d #chartTip{background:rgba(249,252,255,.94)!important
 body.light #chartWrap.is-3d{background:#06101f!important;border-color:rgba(34,211,238,.52)!important}
 body.light #chartWrap.is-3d #historyChart text{fill:#b7d8ed!important}
 @media(max-width:600px){#chartWrap.is-3d{height:380px!important;min-height:380px!important}#chartWrap.is-3d #historyChart{height:380px!important;min-height:380px!important}}
+
 /* SKSI 3D redesign v2: WebGL is the chart, not a decoration behind SVG. */
 #chartWrap.is-3d{height:460px!important;min-height:460px!important;overflow:hidden!important;position:relative!important;background:#06101f!important;border:1px solid rgba(34,211,238,.42)!important;border-radius:16px!important;box-shadow:inset 0 0 50px rgba(0,195,255,.045),0 14px 38px rgba(0,0,0,.2)!important;isolation:isolate}
 #chartWrap.is-3d #sksiWebGL{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:100%!important;z-index:2!important;display:block!important;pointer-events:auto!important;touch-action:pan-y!important;outline:none}
@@ -701,7 +702,6 @@ body.light #chartWrap.is-3d #historyChart text{fill:#b7d8ed!important}
 body.light #chartWrap.is-3d{background:#06101f!important;border-color:rgba(34,211,238,.42)!important}
 body.light #chartWrap.is-3d #historyChart text{fill:#bcefff!important}
 @media(max-width:760px){#chartWrap.is-3d{height:390px!important;min-height:390px!important}#chartWrap.is-3d #historyChart{height:100%!important}}
-
 
 </style>
 </head>
@@ -823,7 +823,6 @@ function sksi3dDraw(rows){
  const last=pts[pts.length-1],beacon=add(BABYLON.MeshBuilder.CreateSphere('sksiLatestPoint',{diameter:.105,segments:16},q.scene));beacon.position.copyFrom(last);beacon.material=mat('sksiLatestMaterial','#d8fbff','#22d3ee',1);beacon.isPickable=false;
  q.engine.resize();
 }
-
 function renderChart(){
  const svg=$('historyChart'),wrap=$('chartWrap'),tip=$('chartTip');if(!svg||!chartRows.length)return;
  const all=chartRows;const lastYear=Number(all[all.length-1].date.slice(0,4));const minYear=chartYears?lastYear-chartYears: Number(all[0].date.slice(0,4));
