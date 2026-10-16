@@ -705,6 +705,20 @@ body.light #chartWrap.is-3d #historyChart text{fill:#b7d8ed!important}
 @keyframes sksiRing{0%{opacity:.9;transform:scale(.45)}100%{opacity:0;transform:scale(1.8)}}
 @media(prefers-reduced-motion:reduce){#chartWrap.is-3d:after,#chartWrap.is-3d #historyChart .sksi-pulse-node,#chartWrap.is-3d #historyChart .sksi-end-ring{animation:none!important}}
 
+
+/* Environment-first 3D: keep the data curve thin; put the depth into its stage. */
+#chartWrap.is-3d{background:radial-gradient(ellipse at 50% 22%,rgba(8,145,178,.20),transparent 48%),linear-gradient(180deg,#06182a 0%,#07101e 68%,#030812 100%)!important;overflow:hidden!important}
+#chartWrap.is-3d #historyChart .spatial-curve{stroke-width:2.6!important;filter:drop-shadow(0 0 2px rgba(103,232,249,.55))!important}
+#chartWrap.is-3d #historyChart .sksi-neon-halo{stroke-width:4!important;opacity:.08!important;filter:blur(2px)!important}
+#chartWrap.is-3d #historyChart .plot-extrusion polyline{stroke-width:2.2!important;opacity:.82!important}
+#chartWrap.is-3d #historyChart .sksi-depth-ribs{opacity:.78!important}
+#chartWrap.is-3d #historyChart .spatial-floor{opacity:.85!important}
+#chartWrap.is-3d .sksi-environment-grid{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;perspective:460px;transform-style:preserve-3d}
+#chartWrap.is-3d .sksi-environment-grid:before{content:"";position:absolute;left:-35%;right:-35%;height:82%;bottom:-35%;transform:rotateX(58deg);transform-origin:center bottom;background-image:linear-gradient(rgba(34,211,238,.19) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.19) 1px,transparent 1px);background-size:38px 38px;mask-image:linear-gradient(to top,rgba(0,0,0,.95),transparent 92%);animation:sksiGridDrift 14s linear infinite}
+#chartWrap.is-3d .sksi-environment-grid:after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 75%,transparent 0%,rgba(1,7,17,.1) 42%,rgba(1,7,17,.62) 100%);box-shadow:inset 0 0 55px rgba(0,0,0,.34)}
+@keyframes sksiGridDrift{from{background-position:0 0,0 0}to{background-position:0 38px,38px 0}}
+@media(prefers-reduced-motion:reduce){#chartWrap.is-3d .sksi-environment-grid:before{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -784,6 +798,7 @@ function sksi3dDraw(rows){
 }
 function renderChart(){
  const svg=$('historyChart'),wrap=$('chartWrap'),tip=$('chartTip');if(!svg||!chartRows.length)return;
+  if(wrap&&!wrap.querySelector('.sksi-environment-grid')){const env=document.createElement('div');env.className='sksi-environment-grid';env.setAttribute('aria-hidden','true');wrap.prepend(env);}
  const all=chartRows;const lastYear=Number(all[all.length-1].date.slice(0,4));const minYear=chartYears?lastYear-chartYears: Number(all[0].date.slice(0,4));
  const rows=all.filter(r=>Number(r.date.slice(0,4))>=minYear);if(rows.length<2)return;
  const W=1000,H=360,L=62,R=22,T=24,B=45,PW=W-L-R,PH=H-T-B;
@@ -816,17 +831,17 @@ function renderChart(){
  svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:'#3b82f6','stroke-width':8,'stroke-linejoin':'round','stroke-linecap':'round',opacity:light?'.14':'.22',filter:'url(#sksiLineGlow)'}));
  if(is3d){
     /* CINEMATIC 3D: extruded data volume and luminous depth ribs. */
-    const dx=24,dy=27,baseY=H-B;
+    const dx=46,dy=34,baseY=H-B;
     const topPts=rows.map((r,i)=>[px3(i),py3(r.score,i)]);
     const volumePts=topPts.concat([[W-R+dx,baseY+dy],[L+dx,baseY+dy],[L,baseY]]);
     svg.appendChild(svgEl('polygon',{points:volumePts.map(p=>p.join(',')).join(' '),fill:light?'rgba(37,99,235,.16)':'rgba(14,165,233,.19)',stroke:light?'rgba(96,165,250,.38)':'rgba(34,211,238,.38)','stroke-width':1,'aria-hidden':'true'}));
     const ribs=svgEl('g',{class:'sksi-depth-ribs','aria-hidden':'true'});
-    const stride=Math.max(1,Math.floor(rows.length/28));
+    const stride=Math.max(1,Math.floor(rows.length/20));
     for(let i=0;i<rows.length;i+=stride){const xx=px3(i),yy=py3(rows[i].score,i);ribs.appendChild(svgEl('line',{x1:xx,y1:yy,x2:xx+dx,y2:yy+dy,stroke:light?'rgba(37,99,235,.26)':'rgba(103,232,249,.24)','stroke-width':.8}));ribs.appendChild(svgEl('line',{x1:xx+dx,y1:yy+dy,x2:xx+dx,y2:baseY+dy,stroke:light?'rgba(37,99,235,.16)':'rgba(103,232,249,.13)','stroke-width':.7}));}
     svg.appendChild(ribs);
-    const depth=12,side=svgEl('g',{class:'plot-extrusion','aria-hidden':'true'});const backPoints=rows.map((r,i)=>px3(i)+','+(py3(r.score,i)+depth*2.1)).join(' ');side.appendChild(svgEl('polyline',{points:backPoints,fill:'none',stroke:light?'#9ab9e8':'#12365d','stroke-width':11,'stroke-linejoin':'round','stroke-linecap':'round',opacity:'.92'}));for(let layer=depth;layer>=1;layer--){const shifted=rows.map((r,i)=>px3(i)+','+(py3(r.score,i)+layer*2.1)).join(' ');side.appendChild(svgEl('polyline',{points:shifted,fill:'none',stroke:light?(layer>7?'#b7d0f3':'#397ed0'):(layer>7?'#183b63':'#247fc4'),'stroke-width':layer===1?7:6,'stroke-linejoin':'round','stroke-linecap':'round',opacity:layer>7?'.76':'.96'}));}svg.appendChild(side);const floor=svgEl('g',{class:'spatial-floor','aria-hidden':'true'});floor.appendChild(svgEl('path',{d:'M '+px3(0)+' '+py3(0,0)+' L '+px3(rows.length-1)+' '+py3(0,rows.length-1)+' L '+(px3(rows.length-1)+22)+' '+(py3(0,rows.length-1)+25)+' L '+(px3(0)+22)+' '+(py3(0,0)+25)+' Z',fill:light?'rgba(37,99,235,.055)':'rgba(34,211,238,.075)',stroke:light?'rgba(37,99,235,.22)':'rgba(103,232,249,.28)','stroke-width':1}));for(let j=1;j<=8;j++){const t=j/9;floor.appendChild(svgEl('line',{x1:px3(0)+22*t,y1:py3(0,0)+25*t,x2:px3(rows.length-1)+22*t,y2:py3(0,rows.length-1)+25*t,stroke:light?'rgba(37,99,235,.18)':'rgba(103,232,249,.2)','stroke-width':.8}));}svg.appendChild(floor);}
-  svg.appendChild(svgEl('polyline',{points,class:is3d?'spatial-curve':'',fill:'none',stroke:light?'#1d64c8':'#60a5fa','stroke-width':is3d?3.8:2.6,'stroke-linejoin':'round','stroke-linecap':'round'}));
-  if(is3d){svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:'#22d3ee','stroke-width':11,'stroke-linejoin':'round','stroke-linecap':'round',opacity:'.2',class:'sksi-neon-halo'}));const nodes=svgEl('g',{class:'sksi-event-nodes','aria-hidden':'true'});const stride=Math.max(1,Math.floor(rows.length/16));for(let i=0;i<rows.length;i+=stride){const xx=px3(i),yy=py3(rows[i].score,i);nodes.appendChild(svgEl('line',{x1:xx,y1:yy+5,x2:xx+24,y2:yy+32,stroke:'rgba(34,211,238,.3)','stroke-width':1}));nodes.appendChild(svgEl('circle',{cx:xx,cy:yy,r:3.1,fill:'#e0fbff',stroke:'#22d3ee','stroke-width':1.8,class:'sksi-pulse-node'}));}svg.appendChild(nodes);const ex=px3(rows.length-1),ey=py3(rows[rows.length-1].score,rows.length-1);svg.appendChild(svgEl('circle',{cx:ex,cy:ey,r:13,fill:'none',stroke:'#67e8f9','stroke-width':1.2,opacity:'.8',class:'sksi-end-ring'}));}
+    const depth=6,side=svgEl('g',{class:'plot-extrusion','aria-hidden':'true'});const backPoints=rows.map((r,i)=>px3(i)+','+(py3(r.score,i)+depth*2.1)).join(' ');side.appendChild(svgEl('polyline',{points:backPoints,fill:'none',stroke:light?'#9ab9e8':'#12365d','stroke-width':3,'stroke-linejoin':'round','stroke-linecap':'round',opacity:'.72'}));for(let layer=depth;layer>=1;layer--){const shifted=rows.map((r,i)=>px3(i)+','+(py3(r.score,i)+layer*2.1)).join(' ');side.appendChild(svgEl('polyline',{points:shifted,fill:'none',stroke:light?(layer>7?'#b7d0f3':'#397ed0'):(layer>7?'#183b63':'#247fc4'),'stroke-width':layer===1?2.8:2.2,'stroke-linejoin':'round','stroke-linecap':'round',opacity:layer>7?'.76':'.96'}));}svg.appendChild(side);const floor=svgEl('g',{class:'spatial-floor','aria-hidden':'true'});floor.appendChild(svgEl('path',{d:'M '+px3(0)+' '+py3(0,0)+' L '+px3(rows.length-1)+' '+py3(0,rows.length-1)+' L '+(px3(rows.length-1)+22)+' '+(py3(0,rows.length-1)+25)+' L '+(px3(0)+22)+' '+(py3(0,0)+25)+' Z',fill:light?'rgba(37,99,235,.055)':'rgba(34,211,238,.075)',stroke:light?'rgba(37,99,235,.22)':'rgba(103,232,249,.28)','stroke-width':1}));for(let j=1;j<=8;j++){const t=j/9;floor.appendChild(svgEl('line',{x1:px3(0)+22*t,y1:py3(0,0)+25*t,x2:px3(rows.length-1)+22*t,y2:py3(0,rows.length-1)+25*t,stroke:light?'rgba(37,99,235,.18)':'rgba(103,232,249,.2)','stroke-width':.8}));}svg.appendChild(floor);}
+  svg.appendChild(svgEl('polyline',{points,class:is3d?'spatial-curve':'',fill:'none',stroke:light?'#1d64c8':'#60a5fa','stroke-width':2.6,'stroke-linejoin':'round','stroke-linecap':'round'}));
+  if(is3d){svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:'#22d3ee','stroke-width':4,'stroke-linejoin':'round','stroke-linecap':'round',opacity:'.08',class:'sksi-neon-halo'}));const nodes=svgEl('g',{class:'sksi-event-nodes','aria-hidden':'true'});const stride=Math.max(1,Math.floor(rows.length/16));for(let i=0;i<rows.length;i+=stride){const xx=px3(i),yy=py3(rows[i].score,i);nodes.appendChild(svgEl('line',{x1:xx,y1:yy+5,x2:xx+24,y2:yy+32,stroke:'rgba(34,211,238,.3)','stroke-width':1}));nodes.appendChild(svgEl('circle',{cx:xx,cy:yy,r:3.1,fill:'#e0fbff',stroke:'#22d3ee','stroke-width':1.8,class:'sksi-pulse-node'}));}svg.appendChild(nodes);const ex=px3(rows.length-1),ey=py3(rows[rows.length-1].score,rows.length-1);svg.appendChild(svgEl('circle',{cx:ex,cy:ey,r:13,fill:'none',stroke:'#67e8f9','stroke-width':1.2,opacity:'.8',class:'sksi-end-ring'}));}
  const lastPoint=rows[rows.length-1];
  svg.appendChild(svgEl('circle',{cx:px3(rows.length-1),cy:py3(lastPoint.score,rows.length-1),r:10,fill:'#60a5fa',opacity:'.13'}));
  svg.appendChild(svgEl('circle',{cx:x(rows.length-1),cy:y(lastPoint.score),r:4.2,fill:light?'#1d64c8':'#dbeafe',stroke:'#60a5fa','stroke-width':2}));
