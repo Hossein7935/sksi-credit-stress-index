@@ -690,19 +690,6 @@ body.light #chartWrap.is-3d{background:#06101f!important;border-color:rgba(34,21
 body.light #chartWrap.is-3d #historyChart text{fill:#b7d8ed!important}
 @media(max-width:600px){#chartWrap.is-3d{height:380px!important;min-height:380px!important}#chartWrap.is-3d #historyChart{height:380px!important;min-height:380px!important}}
 
-/* SKSI 3D redesign v2: WebGL is the chart, not a decoration behind SVG. */
-#chartWrap.is-3d{height:460px!important;min-height:460px!important;overflow:hidden!important;position:relative!important;background:#06101f!important;border:1px solid rgba(34,211,238,.42)!important;border-radius:16px!important;box-shadow:inset 0 0 50px rgba(0,195,255,.045),0 14px 38px rgba(0,0,0,.2)!important;isolation:isolate}
-#chartWrap.is-3d #sksiWebGL{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:100%!important;z-index:2!important;display:block!important;pointer-events:auto!important;touch-action:pan-y!important;outline:none}
-#chartWrap.is-3d #historyChart{position:absolute!important;inset:0!important;z-index:3!important;width:100%!important;height:100%!important;min-height:100%!important;max-height:none!important;transform:none!important;filter:none!important;background:transparent!important;pointer-events:none!important;overflow:visible!important}
-#chartWrap.is-3d #historyChart>rect,#chartWrap.is-3d #historyChart>line,#chartWrap.is-3d #historyChart>path,#chartWrap.is-3d #historyChart>polyline,#chartWrap.is-3d #historyChart>circle{display:none!important}
-#chartWrap.is-3d #historyChart #crosshair{display:block!important}
-#chartWrap.is-3d #historyChart #crosshair line,#chartWrap.is-3d #historyChart #crosshair circle{display:block!important;opacity:.9!important}
-#chartWrap.is-3d #historyChart text{fill:#bcefff!important;stroke:none!important;font-size:12px!important}
-#chartWrap.is-3d #chartTip{z-index:5!important;pointer-events:none!important;background:rgba(3,18,34,.96)!important;color:#e4fbff!important;border:1px solid rgba(34,211,238,.62)!important;box-shadow:0 10px 34px rgba(0,0,0,.42),0 0 22px rgba(0,190,255,.08)!important}
-body.light #chartWrap.is-3d{background:#06101f!important;border-color:rgba(34,211,238,.42)!important}
-body.light #chartWrap.is-3d #historyChart text{fill:#bcefff!important}
-@media(max-width:760px){#chartWrap.is-3d{height:390px!important;min-height:390px!important}#chartWrap.is-3d #historyChart{height:100%!important}}
-
 </style>
 </head>
 <body>
@@ -774,54 +761,11 @@ const SOURCES={
 let chartRows=[],chartYears=0,chartSelected=null;
 const NS='http://www.w3.org/2000/svg';
 function svgEl(tag,attrs={},txt=''){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;return e;}
-/* True 3D chart: the time series stays planar; depth belongs to the frame, not the data. */
+/* Keep the chart's full SVG visible. Its data labels, threshold lines and extrusion form one coherent plot. */
 let sksi3dScene=null;
 function sksi3dDraw(rows){
- const wrap=$('chartWrap'),enabled=wrap.classList.contains('is-3d');
- if(!enabled){if(sksi3dScene)sksi3dScene.canvas.style.display='none';return;}
- if(!window.BABYLON){$('loadError').textContent='Die 3D-Engine konnte nicht geladen werden.';return;}
- let q=sksi3dScene;
- if(!q){
-  const canvas=document.createElement('canvas');canvas.id='sksiWebGL';canvas.tabIndex=0;canvas.setAttribute('aria-label','SKSI 3D-Zeitreihe. Mit der Maus ziehen zum Drehen, mit dem Mausrad zoomen.');wrap.insertBefore(canvas,wrap.firstChild);
-  const engine=new BABYLON.Engine(canvas,true,{antialias:true,stencil:false,preserveDrawingBuffer:false,adaptToDeviceRatio:true});
-  const scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(.004,.012,.027,1);scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.012;scene.fogColor=new BABYLON.Color3(.004,.012,.027);
-  const camera=new BABYLON.ArcRotateCamera('sksiCamera',-Math.PI/2,1.18,10.1,new BABYLON.Vector3(0,.05,0),scene);camera.lowerRadiusLimit=7.1;camera.upperRadiusLimit=15;camera.lowerBetaLimit=.68;camera.upperBetaLimit=1.48;camera.panningSensibility=0;camera.inertia=.72;
-  const hemi=new BABYLON.HemisphericLight('sksiAmbient',new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.78;
-  const key=new BABYLON.PointLight('sksiKey',new BABYLON.Vector3(-3,4,-4),scene);key.diffuse=new BABYLON.Color3(.1,.78,.95);key.specular=new BABYLON.Color3(.18,.82,1);key.intensity=1.3;
-  const glow=new BABYLON.GlowLayer('sksiGlow',scene,{blurKernelSize:32});glow.intensity=.28;
-  q=sksi3dScene={canvas,engine,scene,camera,glow,root:null,rows:[],drag:null};
-  engine.runRenderLoop(()=>{if(sksi3dScene&&sksi3dScene.canvas.style.display!=='none')sksi3dScene.scene.render();});
-  window.addEventListener('resize',()=>{if(sksi3dScene)sksi3dScene.engine.resize();});
-  canvas.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')return;q.drag={x:e.clientX,y:e.clientY,alpha:q.camera.alpha,beta:q.camera.beta};canvas.setPointerCapture(e.pointerId);});
-  canvas.addEventListener('pointerup',()=>{q.drag=null;});canvas.addEventListener('pointercancel',()=>{q.drag=null;});
-  canvas.addEventListener('pointermove',e=>{const rect=canvas.getBoundingClientRect();if(q.drag){const dx=e.clientX-q.drag.x,dy=e.clientY-q.drag.y;q.camera.alpha=q.drag.alpha-dx*.006;q.camera.beta=Math.max(.68,Math.min(1.48,q.drag.beta+dy*.004));}const norm=(e.clientX-rect.left)/rect.width,plot=(norm-.062)/.916,i=Math.max(0,Math.min(q.rows.length-1,Math.round(plot*(q.rows.length-1))));if(q.rows.length&&plot>=-.02&&plot<=1.02)showChartPoint(i,e.clientX,e.clientY,false);});
-  canvas.addEventListener('pointerleave',()=>{if(!chartSelected){const tip=$('chartTip'),cross=$('crosshair');if(tip)tip.style.display='none';if(cross)cross.setAttribute('visibility','hidden');}});
-  canvas.addEventListener('wheel',e=>{e.preventDefault();q.camera.radius=Math.max(7.1,Math.min(15,q.camera.radius+Math.sign(e.deltaY)*.45));},{passive:false});
-  canvas.addEventListener('click',e=>{if(!q.rows.length)return;const r=canvas.getBoundingClientRect(),plot=((e.clientX-r.left)/r.width-.062)/.916,i=Math.max(0,Math.min(q.rows.length-1,Math.round(plot*(q.rows.length-1))));showChartPoint(i,e.clientX,e.clientY,true);});
- }
- q.canvas.style.display='block';q.rows=rows;q.scene.clearColor=new BABYLON.Color4(.004,.012,.027,1);q.scene.fogColor=new BABYLON.Color3(.004,.012,.027);q.glow.intensity=.28;
- if(q.root)q.root.dispose(false,true);q.root=new BABYLON.TransformNode('sksiChartRoot',q.scene);const add=m=>{m.parent=q.root;return m;};
- const mat=(name,color,emissive,alpha=1)=>{const m=new BABYLON.StandardMaterial(name,q.scene);m.diffuseColor=BABYLON.Color3.FromHexString(color);m.emissiveColor=BABYLON.Color3.FromHexString(emissive);m.alpha=alpha;m.specularColor=new BABYLON.Color3(.12,.42,.5);m.specularPower=48;m.backFaceCulling=false;return m;};
- const baseY=-1.62,backZ=1.45,frontZ=-2.15,x0=-3.82,x1=3.82,gridLines=[],wallLines=[];
- for(let i=0;i<=20;i++){const x=x0+(x1-x0)*i/20;gridLines.push([new BABYLON.Vector3(x,baseY,frontZ),new BABYLON.Vector3(x,baseY,backZ)]);}
- for(let i=0;i<=10;i++){const z=frontZ+(backZ-frontZ)*i/10;gridLines.push([new BABYLON.Vector3(x0,baseY,z),new BABYLON.Vector3(x1,baseY,z)]);}
- for(let i=0;i<=20;i++){const x=x0+(x1-x0)*i/20;wallLines.push([new BABYLON.Vector3(x,baseY,backZ),new BABYLON.Vector3(x,1.62,backZ)]);}
- for(let i=0;i<=10;i++){const y=baseY+(1.62-baseY)*i/10;wallLines.push([new BABYLON.Vector3(x0,y,backZ),new BABYLON.Vector3(x1,y,backZ)]);}
- const grid=add(BABYLON.MeshBuilder.CreateLineSystem('sksiFloorGrid',{lines:gridLines},q.scene));grid.material=mat('sksiGridMaterial','#0b3b52','#062b3d',.68);grid.isPickable=false;
- const wall=add(BABYLON.MeshBuilder.CreateLineSystem('sksiBackGrid',{lines:wallLines},q.scene));wall.material=mat('sksiWallGridMaterial','#0b3b52','#062b3d',.56);wall.isPickable=false;
- const frameLines=[[new BABYLON.Vector3(x0,baseY,frontZ),new BABYLON.Vector3(x1,baseY,frontZ)],[new BABYLON.Vector3(x0,baseY,frontZ),new BABYLON.Vector3(x0,baseY,backZ)],[new BABYLON.Vector3(x1,baseY,frontZ),new BABYLON.Vector3(x1,baseY,backZ)],[new BABYLON.Vector3(x0,baseY,backZ),new BABYLON.Vector3(x0,1.62,backZ)],[new BABYLON.Vector3(x0,1.62,backZ),new BABYLON.Vector3(x1,1.62,backZ)],[new BABYLON.Vector3(x1,baseY,backZ),new BABYLON.Vector3(x1,1.62,backZ)]];
- const frame=add(BABYLON.MeshBuilder.CreateLineSystem('sksiFrame',{lines:frameLines},q.scene));frame.material=mat('sksiFrameMaterial','#1989a8','#087b9d',.95);frame.isPickable=false;
- const thresholds=[48,68,84].map(v=>{const y=baseY+v/100*3.24;return [new BABYLON.Vector3(x0,y,backZ-.015),new BABYLON.Vector3(x1,y,backZ-.015)];});
- const thresholdMesh=add(BABYLON.MeshBuilder.CreateLineSystem('sksiThresholds',{lines:thresholds},q.scene));thresholdMesh.material=mat('sksiThresholdMaterial','#22bfe0','#087f9f',.85);thresholdMesh.isPickable=false;
- const pts=rows.map((r,i)=>new BABYLON.Vector3(x0+(x1-x0)*i/Math.max(1,rows.length-1),baseY+Math.max(0,Math.min(100,Number(r.score)))/100*3.24,.12));
- const floorPts=pts.map(p=>new BABYLON.Vector3(p.x,baseY+.012,p.z));
- const area=add(BABYLON.MeshBuilder.CreateRibbon('sksiArea',{pathArray:[pts,floorPts],sideOrientation:BABYLON.Mesh.DOUBLESIDE},q.scene));area.material=mat('sksiAreaMaterial','#087da5','#005a7d',.22);area.isPickable=false;
- const outer=add(BABYLON.MeshBuilder.CreateTube('sksiCurveBloom',{path:pts,radius:.045,tessellation:8,cap:BABYLON.Mesh.CAP_ALL},q.scene));outer.material=mat('sksiCurveBloomMaterial','#00bce8','#00a6ce',.3);outer.isPickable=false;
- const curve=add(BABYLON.MeshBuilder.CreateTube('sksiCurve',{path:pts,radius:.014,tessellation:8,cap:BABYLON.Mesh.CAP_ALL},q.scene));curve.material=mat('sksiCurveMaterial','#8cecff','#2adfff',1);curve.isPickable=false;
- const columns=[],stride=Math.max(1,Math.floor(rows.length/34));for(let i=0;i<pts.length;i+=stride)columns.push([new BABYLON.Vector3(pts[i].x,baseY+.015,pts[i].z),pts[i]]);
- const stems=add(BABYLON.MeshBuilder.CreateLineSystem('sksiHistoryStems',{lines:columns},q.scene));stems.material=mat('sksiStemMaterial','#137b9a','#087c9b',.58);stems.isPickable=false;
- const last=pts[pts.length-1],beacon=add(BABYLON.MeshBuilder.CreateSphere('sksiLatestPoint',{diameter:.105,segments:16},q.scene));beacon.position.copyFrom(last);beacon.material=mat('sksiLatestMaterial','#d8fbff','#22d3ee',1);beacon.isPickable=false;
- q.engine.resize();
+ const canvas=document.getElementById('sksiWebGL');
+ if(canvas)canvas.style.display='none';
 }
 function renderChart(){
  const svg=$('historyChart'),wrap=$('chartWrap'),tip=$('chartTip');if(!svg||!chartRows.length)return;
