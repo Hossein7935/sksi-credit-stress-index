@@ -24,6 +24,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_CSV = ROOT / "data" / "sksi_weekly.csv"
 LATEST_JSON = ROOT / "data" / "latest.json"
 CHART_SVG = ROOT / "docs" / "history.svg"
+SITEMAP_PATHS = [
+    ROOT / "docs" / "sitemap.xml",
+    ROOT / "sitemap.xml",
+]
 FIELDS = ["date", "score", "regime", "quorum", "raw"]
 
 
@@ -54,6 +58,24 @@ def write_history(rows: list[dict], path: Path = DATA_CSV) -> None:
                     "raw": f"{float(row['raw']):.6f}",
                 }
             )
+
+
+def write_sitemap(lastmod: str) -> None:
+    """Write a valid Google sitemap with current lastmod."""
+    content = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        "  <url>\n"
+        "    <loc>https://hossein7935.github.io/sksi-credit-stress-index/</loc>\n"
+        f"    <lastmod>{lastmod}</lastmod>\n"
+        "    <changefreq>weekly</changefreq>\n"
+        "    <priority>1.0</priority>\n"
+        "  </url>\n"
+        "</urlset>\n"
+    )
+    for path in SITEMAP_PATHS:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content)
 
 
 def matched_weeks(series: dict[str, dict[datetime, float]]) -> list[dict]:
@@ -164,6 +186,9 @@ def main() -> int:
     LATEST_JSON.write_text(json.dumps(latest, ensure_ascii=False, indent=2) + "\n")
     CHART_SVG.parent.mkdir(parents=True, exist_ok=True)
     CHART_SVG.write_text(render_svg(merged))
+    # Keep sitemap lastmod in sync with the latest data week
+    lastmod = str(latest["date"])[:10]  # YYYY-MM-DD
+    write_sitemap(lastmod)
     print(
         f"{latest['date']}  SKSI {latest['score']:.1f}  {latest['regime']}"
         f"  quorum={str(latest['quorum']).lower()}"
