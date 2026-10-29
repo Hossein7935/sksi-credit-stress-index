@@ -1,35 +1,35 @@
 {
-  "date": "2026-10-16",
-  "score": 18.01,
+  "date": "2026-10-23",
+  "score": 18.26,
   "regime": "normal",
   "quorum": false,
-  "raw": -0.488272,
+  "raw": -0.473287,
   "components": {
     "hy": {
       "name": "High-Yield-OAS",
-      "value": 3.31,
-      "z": -0.624,
+      "value": 3.38,
+      "z": -0.594,
       "state": "niedrig"
     },
     "ig": {
       "name": "Investment-Grade-OAS",
-      "value": 0.85,
-      "z": -0.58,
-      "state": "niedrig"
+      "value": 0.91,
+      "z": -0.418,
+      "state": "normal"
     },
     "def": {
       "name": "Ausfallprämie (Baa−Aaa)",
-      "value": 0.49,
-      "z": -1.855,
+      "value": 0.47,
+      "z": -1.967,
       "state": "niedrig"
     },
     "nfci": {
       "name": "NFCI",
-      "value": -0.496,
-      "z": 0.316,
+      "value": -0.487,
+      "z": 0.361,
       "state": "normal"
     }
   },
-  "summary": "Ruhig. Die Kreditaufschläge liegen unter ihrem normalen Niveau von 1997–2006, und es gibt kein Quorum für Stress.",
+  "summary": "Ruhig. Keiner der vier Bausteine liegt deutlich über seinem Niveau von 1997–2006.",
   "disclaimer": "Informationssignal, keine Anlageberatung und keine Garantie künftiger Krisen."
 }
